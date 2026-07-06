@@ -1,9 +1,0 @@
-[project]
-name = "goaledge"
-version = "3.0.0"
-description = "GoalEdge — The Gaffer's Match Lab (FastAPI match model)"
-requires-python = ">=3.11"
-
-# Vercel FastAPI builder: tells Vercel where the ASGI app lives.
-[tool.vercel]
-entrypoint = "backend.api.main:app"
