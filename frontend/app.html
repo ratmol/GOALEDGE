@@ -209,6 +209,26 @@
     .vgrid{grid-template-columns:1fr}
     footer{flex-direction:column} footer .fr{text-align:left}
   }
+  /* live scoreboard */
+  .scoreboard{display:flex;gap:.6rem;overflow-x:auto;padding-bottom:.5rem}
+  .sc-note{color:var(--muted);font-size:.9rem;padding:.5rem 0}
+  .sc-note a{color:var(--accent)}
+  .match{flex:0 0 auto;min-width:172px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:.7rem .8rem}
+  .match .comp{font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;
+    color:var(--faint);font-weight:700;margin-bottom:.5rem;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .match .teams{display:flex;flex-direction:column;gap:.25rem;font-size:.92rem}
+  .match .t{display:flex;justify-content:space-between;gap:.7rem}
+  .match .t .sc{font-family:var(--mono);font-weight:700}
+  .match .foot{margin-top:.55rem;display:flex;align-items:center;gap:.4rem;
+    font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--danger);
+    animation:scpulse 1.2s infinite}
+  .badge-live{color:var(--danger)} .badge-ft{color:var(--faint)}
+  .badge-ko{color:var(--muted)}
+  @keyframes scpulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @media (prefers-reduced-motion: reduce){.dot{animation:none}}
 </style>
 </head>
 <body>
@@ -232,6 +252,11 @@
       <span><b>20k</b>simulations / match</span>
     </div>
   </div>
+
+  <section>
+    <div class="slabel"><span class="n">live</span><h2>on now &amp; recent</h2><span class="rule"></span></div>
+    <div id="scores" class="scoreboard"><span class="sc-note">loading scores…</span></div>
+  </section>
 
   <section>
     <div class="slabel"><span class="n">01.</span><h2>the matchup</h2><span class="rule"></span></div>
@@ -535,7 +560,31 @@ async function loadFixtures(){
 }
 function pick(h,a,n){$('home').value=h;$('away').value=a;$('neutral').checked=n;
   window.scrollTo({top:0,behavior:'smooth'});}
-loadHealth();loadTeams();loadFixtures();
+function koTime(iso){try{return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+function matchCard(m,kind){
+  let foot;
+  if(kind==='live')foot=`<span class="dot"></span><span class="badge-live">${m.status==='PAUSED'?'HT':'LIVE'}</span>`;
+  else if(kind==='finished')foot=`<span class="badge-ft">full time</span>`;
+  else foot=`<span class="badge-ko">${koTime(m.utc_date)||'kickoff'}</span>`;
+  const sc=v=>v==null?'':v;
+  return `<div class="match"><div class="comp">${m.competition||'—'}</div>
+    <div class="teams">
+      <div class="t"><span>${m.home}</span><span class="sc">${sc(m.home_score)}</span></div>
+      <div class="t"><span>${m.away}</span><span class="sc">${sc(m.away_score)}</span></div>
+    </div><div class="foot">${foot}</div></div>`;
+}
+async function loadScores(){
+  try{
+    const d=await (await fetch('/live')).json();
+    const box=$('scores');
+    if(d.available===false){box.innerHTML=`<span class="sc-note">${d.note||'Live scores unavailable.'}</span>`;return;}
+    const cards=[...(d.live||[]).map(m=>matchCard(m,'live')),
+                 ...(d.finished||[]).map(m=>matchCard(m,'finished')),
+                 ...(d.upcoming||[]).map(m=>matchCard(m,'upcoming'))];
+    box.innerHTML=cards.length?cards.join(''):`<span class="sc-note">${d.note||'No matches on now — check back around kickoff.'}</span>`;
+  }catch(e){$('scores').innerHTML='<span class="sc-note">Scores unavailable right now.</span>';}
+}
+loadHealth();loadTeams();loadFixtures();loadScores();setInterval(loadScores,30000);
 </script>
 </body>
 </html>

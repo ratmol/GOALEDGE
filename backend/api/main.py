@@ -45,6 +45,7 @@ from backend.llm.ollama_client import OllamaClient, write_preview
 from backend.skills.token_optimizer import TokenOptimizer
 from backend.value.engine import assess_1x2, assess_market
 from backend.value import odds_api
+from backend.live import scores as live_scores
 
 app = FastAPI(title="GoalEdge — The Gaffer's Match Lab", version="3.0.0")
 N_SIMS = int(os.getenv("N_SIMS", "20000"))
@@ -355,6 +356,13 @@ def analyst_ask(payload: dict = Body(...)):
     if not q:
         raise HTTPException(status_code=400, detail="question is required")
     return _analyst.ask(q, payload.get("home"), payload.get("away"))
+
+
+@app.get("/live")
+def live():
+    """Live / recently-finished / upcoming matches (football-data.org, cached).
+    Always 200 with an `available` flag so the UI shows a note, not an error."""
+    return live_scores.board()
 
 
 if _DIST.exists() and (_DIST / "assets").exists():
