@@ -325,6 +325,11 @@ async function loadHealth(){
     const h=await (await fetch('/health')).json();
     $('m-matches').textContent=h.matches; $('m-teams').textContent=h.teams;
     $('m-model').textContent=h.model==='phase1_blend'?'DC + XGB':'elo';
+    if(h.odds_api===false){
+      const b=$('liveodds');
+      if(b){b.disabled=true;b.textContent='Live odds (add key)';
+        b.title='Set ODDS_API_KEY (free at the-odds-api.com) to pull live odds. Meanwhile, type odds in manually.';}
+    }
   }catch(e){}
 }
 async function loadTeams(){

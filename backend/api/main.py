@@ -20,8 +20,10 @@ Run:  uvicorn backend.api.main:app --reload   (serves frontend/app.html at /)
 """
 from __future__ import annotations
 
+import os
 import sys
 import threading
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, BackgroundTasks, Body, HTTPException
@@ -36,7 +38,8 @@ _DIST = _PROJECT_ROOT / "frontend" / "dist"
 _DASHBOARD = _PROJECT_ROOT / "frontend" / "app.html"
 
 from backend.models.elo import EloModel
-from backend.models.match_simulator import build_default_simulator
+from backend.models.match_simulator import (build_default_simulator,
+                                            MatchSimulator, TeamModel)
 from backend.llm.analyst import Analyst
 from backend.llm.ollama_client import OllamaClient, write_preview
 from backend.skills.token_optimizer import TokenOptimizer
@@ -44,21 +47,26 @@ from backend.value.engine import assess_1x2, assess_market
 from backend.value import odds_api
 
 app = FastAPI(title="GoalEdge — The Gaffer's Match Lab", version="3.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
-                   allow_methods=["*"], allow_headers=["*"])
+N_SIMS = int(os.getenv("N_SIMS", "20000"))
+_origins_env = os.getenv("ALLOWED_ORIGINS", "*").strip()
+_allowed_origins = ["*"] if _origins_env == "*" else [
+    o.strip() for o in _origins_env.split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=_allowed_origins,
+                   allow_methods=["GET", "POST"], allow_headers=["*"])
 
 _elo = EloModel()
-# v3 fix: the Elo baseline used to ship UNFITTED (every team 1500). Fit it
-# through the full match history at startup so the fallback is a real model.
+# Load the match history ONCE and share it between the Elo warm-up and the
+# simulator (avoids reading the ~20k-row dataset twice on cold start).
 try:
-    from backend.data.loader import load_matches as _lm
-    for _r in _lm(verbose=False).sort_values("date").itertuples(index=False):
+    from backend.data.loader import load_matches
+    _df = load_matches(verbose=False)
+    for _r in _df.sort_values("date").itertuples(index=False):
         _elo.update(_r.home_team, _r.away_team, int(_r.home_score),
                     int(_r.away_score), bool(getattr(_r, "neutral", True)))
+    _simulator = MatchSimulator(TeamModel().fit(_df), n_sims=N_SIMS)
 except Exception as _e:
-    print(f"[api] Elo warm-up failed: {_e}")
-
-_simulator = build_default_simulator(n_sims=20000)
+    print(f"[api] startup data load failed, falling back: {_e}")
+    _simulator = build_default_simulator(n_sims=N_SIMS)
 _phase1 = None
 _training_active = False
 
@@ -89,6 +97,36 @@ def _predict(home, away, neutral):
 _ollama = OllamaClient()
 _optimizer = TokenOptimizer()
 _analyst = Analyst(_simulator, _ollama)
+
+
+def _require_teams(home: str, away: str):
+    """Boundary validation: reject same-team / unknown-team requests."""
+    if home == away:
+        raise HTTPException(status_code=400,
+                            detail="Pick two different teams")
+    missing = [t for t in (home, away) if t not in set(_simulator.tm.teams)]
+    if missing:
+        raise HTTPException(status_code=404,
+                            detail=f"Unknown team(s): {', '.join(missing)}. See /teams.")
+
+
+def _require_odds(*odds):
+    if any(o is not None and o <= 1.0 for o in odds):
+        raise HTTPException(status_code=422,
+                            detail="Decimal odds must be greater than 1.0")
+
+
+_odds_cache: dict = {}   # (home, away) -> (ts, result); warm-instance TTL cache
+
+
+def _cached_consensus(home: str, away: str, ttl: float = 60.0):
+    key = (home, away); now = time.time()
+    hit = _odds_cache.get(key)
+    if hit and now - hit[0] < ttl:
+        return hit[1]
+    res = odds_api.consensus_odds(home, away)
+    _odds_cache[key] = (now, res)
+    return res
 
 
 @app.get("/health")
@@ -135,8 +173,7 @@ def analysis(home: str, away: str, neutral: bool = True):
 def match_full(home: str, away: str, neutral: bool = True,
                rest_home: float = 4.0, rest_away: float = 4.0):
     """Full match-stat profile + form, recovery and markets."""
-    if home == away:
-        raise HTTPException(status_code=400, detail="Pick two different teams")
+    _require_teams(home, away)
     return _simulator.simulate(home, away, neutral, rest_home, rest_away)
 
 
@@ -144,8 +181,7 @@ def match_full(home: str, away: str, neutral: bool = True,
 def match_scout(home: str, away: str, neutral: bool = True,
                 rest_home: float = 4.0, rest_away: float = 4.0):
     """Full stat profile + an Ollama-written scout report."""
-    if home == away:
-        raise HTTPException(status_code=400, detail="Pick two different teams")
+    _require_teams(home, away)
     sim = _simulator.simulate(home, away, neutral, rest_home, rest_away)
     o, m, ts = sim["outcome"], sim["markets"], sim["team_stats"]
     must = (f"{home} win {o['home_win']}% / draw {o['draw']}% / "
@@ -217,7 +253,9 @@ def train(background_tasks: BackgroundTasks):
 def value_manual(home: str, away: str, odds_home: float, odds_draw: float,
                  odds_away: float, neutral: bool = True,
                  bankroll: float = 100.0, kelly_fraction: float = 0.25):
-    """Type in your bookmaker's 1X2 odds → edge, EV and Kelly stake."""
+    """Type in your bookmaker's 1X2 odds -> edge, EV and Kelly stake."""
+    _require_teams(home, away)
+    _require_odds(odds_home, odds_draw, odds_away)
     probs, model = _predict(home, away, neutral)
     res = assess_1x2(probs, odds_home, odds_draw, odds_away,
                      home=home, away=away, bankroll=bankroll,
@@ -236,7 +274,8 @@ def value_live(home: str, away: str, neutral: bool = True,
         raise HTTPException(status_code=503,
                             detail="ODDS_API_KEY not set — use /value/manual "
                                    "or add a free key from the-odds-api.com")
-    found = odds_api.consensus_odds(home, away)
+    _require_teams(home, away)
+    found = _cached_consensus(home, away)
     if found is None:
         raise HTTPException(status_code=404,
                             detail=f"No live odds found for {home} vs {away}")
@@ -260,6 +299,8 @@ def value_market(home: str, away: str, market: str, odds_yes: float,
                  bankroll: float = 100.0, kelly_fraction: float = 0.25):
     """Assess a side market (over_2_5_goals, btts_yes, ...) vs your odds.
     Probabilities come from the Monte Carlo simulator."""
+    _require_teams(home, away)
+    _require_odds(odds_yes, odds_no)
     sim = _simulator.simulate(home, away, neutral)
     mkts = sim["markets"]
     if market not in mkts:
