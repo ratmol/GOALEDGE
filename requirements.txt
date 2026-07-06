@@ -1,23 +1,9 @@
-# --- Core data ---
+# Runtime dependencies for the deployed API (kept slim for Vercel).
+# For local model TRAINING / RL, also install requirements-dev.txt.
+fastapi>=0.111
+uvicorn[standard]>=0.30
 pandas>=2.2
 numpy>=1.26
 requests>=2.32
 python-dotenv>=1.0
-
-# --- Modeling (Phase 1) ---
-scikit-learn>=1.4
-xgboost>=2.0
-scipy>=1.12          # Poisson / Dixon-Coles
-
-# --- Reinforcement learning (Phase 2) ---
-stable-baselines3>=2.3
-gymnasium>=0.29
-
-# --- API ---
-fastapi>=0.111
-uvicorn[standard]>=0.30
-
-# --- Utilities ---
-tiktoken>=0.7        # token counting for the token optimizer
-tenacity>=8.3        # retry logic for API calls
-rich>=13.7           # nice CLI loop output
+tiktoken>=0.7          # optional; token_optimizer falls back if absent

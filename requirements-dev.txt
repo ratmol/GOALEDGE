@@ -1,0 +1,9 @@
+# Local development / training / RL. NOT installed on Vercel.
+-r requirements.txt
+scikit-learn>=1.4
+xgboost>=2.0
+scipy>=1.12
+stable-baselines3>=2.3
+gymnasium>=0.29
+tenacity>=8.3
+rich>=13.7

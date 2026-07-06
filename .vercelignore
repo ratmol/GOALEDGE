@@ -1,0 +1,14 @@
+.venv/
+venv/
+**/__pycache__/
+*.pyc
+.git/
+.env
+frontend/node_modules/
+frontend/dist/
+frontend/src/
+backend/models/phase1.pkl
+train.py
+scripts/
+tests/
+*.ipynb
