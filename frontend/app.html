@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GoalEdge — price the match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d0b; --bg2:#0e1210;
+    --card:rgba(255,255,255,.025);
+    --ink:#ece9e2; --muted:#93a29a; --faint:#5c6b63;
+    --line:rgba(236,233,226,.09); --line2:rgba(236,233,226,.05);
+    --accent:#6fd6a0; --accent-dim:rgba(111,214,160,.12);
+    --home:#6fd6a0; --away:#dfa963; --draw:#4b5851;
+    --danger:#d98a72;
+    --serif:'Fraunces',Georgia,serif;
+    --sans:'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'IBM Plex Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1100px 500px at 78% -8%, rgba(111,214,160,.07), transparent 60%),
+      radial-gradient(800px 420px at -10% 30%, rgba(223,169,99,.04), transparent 55%);
+    background-attachment:fixed}
+  .wrap{max-width:980px;margin:0 auto;padding:0 1.5rem 6rem}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---------- top nav ---------- */
+  nav{display:flex;align-items:center;gap:1rem;padding:1.6rem 0 0}
+  nav .logo{font-family:var(--serif);font-weight:500;font-size:1.15rem;letter-spacing:.01em}
+  nav .logo b{color:var(--accent);font-weight:500}
+  nav .tag{margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--faint);
+    text-transform:lowercase;letter-spacing:.06em}
+
+  /* ---------- hero ---------- */
+  .hero{padding:4.5rem 0 3.5rem;border-bottom:1px solid var(--line2)}
+  .hero .kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:1.3rem}
+  .hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
+    line-height:1.06;letter-spacing:-.015em;max-width:15em}
+  .hero h1 em{font-style:italic;color:var(--accent)}
+  .hero p{margin-top:1.4rem;color:var(--muted);font-size:1rem;max-width:34em}
+  .hero .meta{margin-top:2rem;display:flex;gap:2.2rem;flex-wrap:wrap;
+    font-family:var(--mono);font-size:.72rem;color:var(--faint)}
+  .hero .meta b{color:var(--ink);font-weight:500;display:block;font-size:.95rem}
+
+  /* ---------- sections ---------- */
+  section{padding-top:3.2rem}
+  .slabel{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.2rem}
+  .slabel .n{font-family:var(--mono);font-size:.72rem;color:var(--accent)}
+  .slabel h2{font-family:var(--serif);font-weight:400;font-size:1.35rem;
+    letter-spacing:.005em;text-transform:lowercase}
+  .slabel .rule{flex:1;height:1px;background:var(--line2);align-self:center}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:1.6rem 1.7rem;margin-bottom:1rem;backdrop-filter:blur(4px)}
+  .card h3{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;
+    letter-spacing:.14em;color:var(--faint);font-weight:500;margin-bottom:1.1rem}
+
+  /* ---------- controls ---------- */
+  .controls{display:grid;grid-template-columns:1fr auto 1fr;gap:1.1rem;align-items:end}
+  label.fl{display:block;font-family:var(--mono);font-size:.64rem;text-transform:uppercase;
+    letter-spacing:.13em;color:var(--faint);margin-bottom:.45rem}
+  select,input[type=number],input[type=text]{width:100%;padding:.68rem .75rem;
+    border:1px solid var(--line);border-radius:10px;background:var(--bg2);
+    font-size:.95rem;font-weight:500;color:var(--ink);font-family:var(--sans)}
+  select{cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg width='9' height='6' viewBox='0 0 9 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='%2393a29a' stroke-width='1.4'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right .8rem center}
+  select:focus,input:focus{outline:1.5px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  input[type=number]{font-family:var(--mono);font-size:.9rem}
+  .vs{font-family:var(--serif);font-style:italic;color:var(--faint);text-align:center;
+    padding-bottom:.7rem;font-size:.95rem}
+  .opts{display:flex;align-items:center;gap:1.4rem;margin-top:1.15rem;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:.5rem;font-size:.84rem;color:var(--muted);cursor:pointer}
+  .chk input{accent-color:var(--accent);width:15px;height:15px}
+  .rest{display:flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--muted)}
+  .rest input{width:58px;padding:.32rem .4rem;text-align:center}
+  .actions{margin-left:auto;display:flex;gap:.55rem}
+  button{font-family:var(--sans);font-weight:600;font-size:.85rem;cursor:pointer;
+    border-radius:999px;padding:.62rem 1.35rem;border:1px solid transparent;
+    transition:all .15s ease;letter-spacing:.01em}
+  .b-primary{background:var(--accent);color:#0a1710}
+  .b-primary:hover{background:#84e2b1;transform:translateY(-1px)}
+  .b-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .b-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  button:disabled{opacity:.5;cursor:wait;transform:none}
+
+  /* ---------- match output ---------- */
+  #out{display:none;margin-top:1rem}
+  .mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem}
+  .mh .side{flex:1}
+  .mh .side.r{text-align:right}
+  .mh .tn{font-family:var(--serif);font-weight:400;font-size:1.7rem;letter-spacing:-.01em}
+  .mh .tn.h{color:var(--home)} .mh .tn.a{color:var(--away)}
+  .mh .xg{font-family:var(--mono);font-size:.74rem;color:var(--muted);margin-top:.2rem}
+  .mh .mid{padding:.5rem 1rem 0;text-align:center;color:var(--faint);
+    font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.14em}
+  .pbar{display:flex;height:38px;border-radius:10px;overflow:hidden;
+    font-size:.8rem;font-weight:600;border:1px solid var(--line)}
+  .pbar div{display:flex;align-items:center;justify-content:center;color:#0a0d0b}
+  .pbar .h{background:var(--home)} .pbar .d{background:var(--draw);color:var(--ink)}
+  .pbar .a{background:var(--away)}
+  .pkey{display:flex;justify-content:space-between;margin-top:.5rem;
+    font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+  .forms{display:flex;justify-content:space-between;margin-top:1.25rem;
+    padding-top:1.1rem;border-top:1px solid var(--line2)}
+  .fcol .ttl{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;
+    letter-spacing:.12em;color:var(--faint);margin-bottom:.45rem}
+  .fcol.r{text-align:right}
+  .pills{display:flex;gap:.28rem}
+  .fcol.r .pills{justify-content:flex-end}
+  .pill{width:23px;height:23px;border-radius:7px;display:grid;place-items:center;
+    font-size:.7rem;font-weight:700;color:#0a0d0b}
+  .pill.W{background:var(--home)} .pill.D{background:var(--draw);color:var(--ink)}
+  .pill.L{background:var(--danger)}
+  .frate{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.4rem}
+
+  table{width:100%;border-collapse:collapse}
+  .stat-tbl td{padding:.55rem 0;font-size:.9rem;border-bottom:1px solid var(--line2)}
+  .stat-tbl tr:last-child td{border-bottom:none}
+  .stat-tbl .lbl{text-align:center;color:var(--faint);font-family:var(--mono);
+    font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;width:34%}
+  .stat-tbl .hv{text-align:right;font-weight:600;width:14%}
+  .stat-tbl .av{text-align:left;font-weight:600;width:14%}
+  .stat-tbl .hv.lead{color:var(--home)} .stat-tbl .av.lead{color:var(--away)}
+  .minibar{display:flex;height:4px;border-radius:2px;overflow:hidden;
+    background:var(--line2);width:19%}
+  .minibar.l{margin-left:auto}
+  .minibar .mh2{background:var(--home);margin-left:auto}
+  .minibar .ma2{background:var(--away)}
+
+  .mkts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem}
+  .mk{border:1px solid var(--line);border-radius:12px;padding:.85rem .95rem;
+    background:var(--bg2)}
+  .mk .mv{font-family:var(--serif);font-size:1.45rem;font-weight:400;color:var(--ink)}
+  .mk .mk-k{font-family:var(--mono);font-size:.64rem;color:var(--faint);
+    text-transform:lowercase;letter-spacing:.04em;margin-top:.2rem}
+
+  .scores{display:flex;gap:.55rem;flex-wrap:wrap}
+  .sc{border:1px solid var(--line);border-radius:999px;padding:.45rem .85rem;
+    font-weight:600;font-size:.88rem;background:var(--bg2)}
+  .sc .scp{color:var(--faint);font-weight:400;font-size:.74rem;margin-left:.4rem}
+
+  .scout{line-height:1.7;font-size:.94rem;white-space:pre-wrap;color:#c9cec7}
+  .cov{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:.6rem;line-height:1.7}
+  .cov .ok{color:var(--accent)}
+  .err{background:rgba(217,138,114,.08);border:1px solid rgba(217,138,114,.35);
+    color:var(--danger);border-radius:12px;padding:.9rem 1.1rem;margin-top:1rem;font-size:.88rem}
+  .sp{display:inline-block;width:12px;height:12px;border:2px solid currentColor;
+    border-top-color:transparent;border-radius:50%;animation:r .7s linear infinite;
+    vertical-align:-1px;margin-right:.45rem}
+  @keyframes r{to{transform:rotate(360deg)}}
+
+  /* ---------- value panel ---------- */
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:.9rem}
+  .vrow2{display:flex;gap:1rem;align-items:end;flex-wrap:wrap}
+  .vrow2 .f{flex:0 0 130px}
+  .vtbl{margin-top:1.1rem;font-size:.86rem}
+  .vtbl th{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;
+    letter-spacing:.12em;color:var(--faint);font-weight:500;text-align:right;
+    padding:.4rem .45rem;border-bottom:1px solid var(--line)}
+  .vtbl th:first-child{text-align:left}
+  .vtbl td{padding:.55rem .45rem;text-align:right;border-bottom:1px solid var(--line2)}
+  .vtbl td:first-child{text-align:left;font-weight:600}
+  .vtbl tr.hit{background:var(--accent-dim)}
+  .pos{color:var(--accent);font-weight:600}.neg{color:var(--danger)}
+  .verdict{margin-top:1rem;padding:.85rem 1rem;border-radius:12px;font-weight:600;
+    font-size:.9rem;background:var(--line2);color:var(--muted);
+    border:1px solid var(--line)}
+  .verdict.yes{background:var(--accent-dim);color:var(--accent);
+    border-color:rgba(111,214,160,.3)}
+  .vnote{font-family:var(--mono);font-size:.7rem;color:var(--away);margin-top:.5rem}
+  .ovr{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:.6rem}
+
+  /* ---------- fixtures ---------- */
+  .fx{display:flex;align-items:center;gap:.8rem;padding:.75rem 0;
+    border-bottom:1px solid var(--line2);font-size:.9rem;flex-wrap:wrap}
+  .fx:last-child{border-bottom:none}
+  .fx .d{color:var(--faint);font-family:var(--mono);font-size:.68rem;width:86px}
+  .fx .t{font-weight:600;flex:1;min-width:210px}
+  .fx .t .st{color:var(--faint);font-weight:400;font-size:.78rem}
+  .fx .pp{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+  .fx button{padding:.32rem .85rem;font-size:.72rem}
+
+  /* ---------- ask ---------- */
+  .askrow{display:flex;gap:.6rem}
+  .askrow input{flex:1;padding:.7rem .9rem}
+  .answer{margin-top:1rem;line-height:1.7;font-size:.92rem;color:#c9cec7;
+    white-space:pre-wrap;display:none}
+  .answer.show{display:block}
+  .answer .used{display:block;margin-top:.7rem;font-family:var(--mono);
+    font-size:.66rem;color:var(--faint)}
+  .answer .off{color:var(--away)}
+
+  footer{margin-top:5rem;padding-top:2rem;border-top:1px solid var(--line2);
+    display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;
+    font-family:var(--mono);font-size:.68rem;color:var(--faint);line-height:1.8}
+  footer .fr{text-align:right}
+  @media (max-width:640px){
+    .controls{grid-template-columns:1fr}
+    .vs{padding:.2rem 0}
+    .vgrid{grid-template-columns:1fr}
+    footer{flex-direction:column} footer .fr{text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <span class="logo">goal<b>edge</b></span>
+    <span class="tag">the gaffer's match lab</span>
+  </nav>
+
+  <div class="hero">
+    <div class="kicker">probabilities, not prophecies</div>
+    <h1>Price the match.<br/>Trust the <em>number</em>,<br/>not the noise.</h1>
+    <p>A Dixon-Coles engine and 20,000 Monte Carlo runs behind every fixture —
+       compared against your bookmaker's odds to find the few prices that are
+       actually wrong. Passing is a position.</p>
+    <div class="meta">
+      <span><b id="m-matches">–</b>matches in data</span>
+      <span><b id="m-teams">–</b>teams rated</span>
+      <span><b id="m-model">–</b>model</span>
+      <span><b>20k</b>simulations / match</span>
+    </div>
+  </div>
+
+  <section>
+    <div class="slabel"><span class="n">01.</span><h2>the matchup</h2><span class="rule"></span></div>
+    <div class="card">
+      <div class="controls">
+        <div>
+          <label class="fl" for="home">Home / first side</label>
+          <select id="home"></select>
+        </div>
+        <div class="vs">vs</div>
+        <div>
+          <label class="fl" for="away">Away / second side</label>
+          <select id="away"></select>
+        </div>
+      </div>
+      <div class="opts">
+        <label class="chk"><input type="checkbox" id="neutral" checked /> Neutral venue</label>
+        <span class="rest">Rest — H<input type="number" id="rh" value="4" min="1" max="14"/></span>
+        <span class="rest">A<input type="number" id="ra" value="4" min="1" max="14"/></span>
+        <div class="actions">
+          <button class="b-ghost" id="scout">Scout report</button>
+          <button class="b-primary" id="run">Run model</button>
+        </div>
+      </div>
+    </div>
+    <div id="err"></div>
+    <div id="out"></div>
+  </section>
+
+  <section>
+    <div class="slabel"><span class="n">02.</span><h2>value check</h2><span class="rule"></span></div>
+    <div class="card">
+      <h3>model vs your bookmaker — edge · EV · kelly stake</h3>
+      <div class="vgrid">
+        <div><label class="fl">Home win odds</label><input id="oh" type="number" step="0.01" min="1.01" placeholder="2.10"/></div>
+        <div><label class="fl">Draw odds</label><input id="od" type="number" step="0.01" min="1.01" placeholder="3.40"/></div>
+        <div><label class="fl">Away win odds</label><input id="oa" type="number" step="0.01" min="1.01" placeholder="3.60"/></div>
+      </div>
+      <div class="vrow2">
+        <div class="f"><label class="fl">Bankroll</label><input id="bank" type="number" value="100" min="1"/></div>
+        <div class="f"><label class="fl">Kelly</label>
+          <select id="kf"><option value="0.25" selected>¼ kelly · sane</option>
+            <option value="0.5">½ kelly · bold</option>
+            <option value="0.125">⅛ kelly · careful</option></select></div>
+        <div class="actions" style="margin-left:auto">
+          <button class="b-ghost" id="liveodds">Live odds</button>
+          <button class="b-primary" id="edge">Find edge</button>
+        </div>
+      </div>
+      <div id="vout"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="slabel"><span class="n">03.</span><h2>world cup 2026</h2><span class="rule"></span></div>
+    <div class="card">
+      <h3>upcoming knockout fixtures — model probabilities &amp; fair odds</h3>
+      <div id="fixtures" class="cov">loading…</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="slabel"><span class="n">04.</span><h2>ask the gaffer</h2><span class="rule"></span></div>
+    <div class="card">
+      <div class="askrow">
+        <input id="q" type="text" placeholder="e.g. Is Portugal vs Spain a low-scoring game? Where's the corner value?" />
+        <button class="b-primary" id="ask">Ask</button>
+      </div>
+      <div id="answer" class="answer"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div>
+      goal rates fitted on real results — world cup, euros, copa américa,<br/>
+      nations league &amp; friendlies · competition- and recency-weighted.<br/>
+      secondary stats modelled where no team profile exists.
+    </div>
+    <div class="fr">
+      a NO BET verdict is the model working, not failing.<br/>
+      bet what you can lose · never chase · mind your jurisdiction.
+    </div>
+  </footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+
+async function loadHealth(){
+  try{
+    const h=await (await fetch('/health')).json();
+    $('m-matches').textContent=h.matches; $('m-teams').textContent=h.teams;
+    $('m-model').textContent=h.model==='phase1_blend'?'DC + XGB':'elo';
+  }catch(e){}
+}
+async function loadTeams(){
+  try{
+    const {teams}=await (await fetch('/teams')).json();
+    for(const t of teams){$('home').add(new Option(t,t));$('away').add(new Option(t,t));}
+    $('home').value=teams.includes('Spain')?'Spain':teams[0];
+    $('away').value=teams.includes('England')?'England':teams[1];
+  }catch(e){err('Could not load teams — is the API running?');}
+}
+function err(m){$('err').innerHTML=`<div class="err">${m}</div>`;}
+function clr(){$('err').innerHTML='';}
+
+function pills(arr){return (arr||[]).map(r=>`<span class="pill ${r}">${r}</span>`).join('');}
+function lead(h,a){return h>a?['lead','']:a>h?['','lead']:['',''];}
+
+function statRow(label,h,a,unit=''){
+  const [lh,la]=lead(h,a);
+  const tot=(Math.abs(h)+Math.abs(a))||1;
+  const hp=Math.abs(h)/tot*100, ap=Math.abs(a)/tot*100;
+  return `<tr>
+    <td class="hv ${lh} num">${h}${unit}</td>
+    <td><div class="minibar l"><div class="mh2" style="width:${hp}%"></div></div></td>
+    <td class="lbl">${label}</td>
+    <td><div class="minibar"><div class="ma2" style="width:${ap}%"></div></div></td>
+    <td class="av ${la} num">${a}${unit}</td>
+  </tr>`;
+}
+function mk(k,v,s='%'){return `<div class="mk"><div class="mv num">${v}${s}</div><div class="mk-k">${k}</div></div>`;}
+
+function render(d){
+  const h=d.fixture.home,a=d.fixture.away,o=d.outcome,ts=d.team_stats,m=d.markets,cv=d.data_coverage;
+  const fh=d.form.home,fa=d.form.away;
+  $('out').innerHTML=`
+   <div class="card">
+     <div class="mh">
+       <div class="side"><div class="tn h">${h}</div>
+         <div class="xg">xG <span class="num">${ts.expected_goals.home}</span></div></div>
+       <div class="mid">expected<br/>goals</div>
+       <div class="side r"><div class="tn a">${a}</div>
+         <div class="xg">xG <span class="num">${ts.expected_goals.away}</span></div></div>
+     </div>
+     <div class="pbar">
+       <div class="h" style="width:${o.home_win}%">${o.home_win>7?o.home_win+'%':''}</div>
+       <div class="d" style="width:${o.draw}%">${o.draw>7?o.draw+'%':''}</div>
+       <div class="a" style="width:${o.away_win}%">${o.away_win>7?o.away_win+'%':''}</div>
+     </div>
+     <div class="pkey"><span>${h} win</span><span>draw</span><span>${a} win</span></div>
+     <div class="forms">
+       <div class="fcol"><div class="ttl">${h} — recent form</div>
+         <div class="pills">${pills(fh.last5)}</div>
+         <div class="frate">form index <span class="num">${fh.rating>0?'+':''}${fh.rating}</span></div></div>
+       <div class="fcol r"><div class="ttl">${a} — recent form</div>
+         <div class="pills">${pills(fa.last5)}</div>
+         <div class="frate">form index <span class="num">${fa.rating>0?'+':''}${fa.rating}</span></div></div>
+     </div>
+   </div>
+
+   <div class="card">
+     <h3>projected match stats</h3>
+     <table class="stat-tbl">
+       ${statRow('Possession',ts.possession.home,ts.possession.away,'%')}
+       ${statRow('Shots',ts.shots.home,ts.shots.away)}
+       ${statRow('On target',ts.shots_on_target.home,ts.shots_on_target.away)}
+       ${statRow('Corners',ts.corners.home,ts.corners.away)}
+       ${statRow('Fouls',ts.fouls.home,ts.fouls.away)}
+       ${statRow('Yellow cards',ts.yellow_cards.home,ts.yellow_cards.away)}
+       ${statRow('Offsides',ts.offsides.home,ts.offsides.away)}
+     </table>
+     <div class="cov">based on <span class="num">${cv.matches}</span> matches across
+       ${cv.competitions.length} competitions ·
+       ${h} <span class="num">${cv.home_matches_in_data}</span> /
+       ${a} <span class="num">${cv.away_matches_in_data}</span> in data
+       ${cv.profile_home||cv.profile_away?` · <span class="ok">✓ real stat profile</span> for ${[cv.profile_home?h:null,cv.profile_away?a:null].filter(Boolean).join(' & ')}`:''}</div>
+   </div>
+
+   <div class="card">
+     <h3>markets</h3>
+     <div class="mkts">
+       ${mk('total goals',m.total_goals_avg,'')}
+       ${mk('over 2.5 goals',m.over_2_5_goals)}
+       ${mk('both teams score',m.btts_yes)}
+       ${mk('total corners',m.total_corners_avg,'')}
+       ${mk('over 10.5 corners',m.over_10_5_corners)}
+       ${mk('total cards',m.total_cards_avg,'')}
+       ${mk('over 3.5 cards',m.over_3_5_cards)}
+       ${mk('red card shown',m.red_card_shown)}
+       ${mk(h+' clean sheet',m.home_clean_sheet)}
+       ${mk(a+' clean sheet',m.away_clean_sheet)}
+     </div>
+   </div>
+
+   <div class="card">
+     <h3>most likely scorelines</h3>
+     <div class="scores">
+       ${d.scorelines.map(s=>`<span class="sc num">${s.score}<span class="scp">${s.prob}%</span></span>`).join('')}
+     </div>
+   </div>
+
+   ${d.scout_report?`<div class="card"><h3>the gaffer's read</h3>
+      <div class="scout">${d.scout_report}</div></div>`:''}
+  `;
+  $('out').style.display='block';
+}
+
+async function call(url,btn,label){
+  clr();
+  if($('home').value===$('away').value){err('Pick two different sides.');return;}
+  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML=`<span class="sp"></span>${label}`;
+  try{
+    const q=`home=${encodeURIComponent($('home').value)}&away=${encodeURIComponent($('away').value)}`+
+            `&neutral=${$('neutral').checked}&rest_home=${$('rh').value}&rest_away=${$('ra').value}`;
+    const r=await fetch(`${url}?${q}`);
+    if(!r.ok)throw new Error('Model error '+r.status);
+    render(await r.json());
+  }catch(e){err(e.message);}
+  btn.disabled=false;btn.innerHTML=old;
+}
+$('run').onclick=e=>call('/match/full',e.currentTarget,'Running');
+$('scout').onclick=e=>call('/match/scout',e.currentTarget,'Scouting');
+
+async function askGaffer(){
+  const q=$('q').value.trim(); if(!q)return;
+  const btn=$('ask'),ans=$('answer'),old=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Thinking';
+  ans.className='answer show';ans.textContent='…';
+  try{
+    const r=await fetch('/analyst/ask',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:q,home:$('home').value,away:$('away').value})});
+    const d=await r.json();
+    const used=(d.tools_used||[]).map(t=>typeof t==='string'?t:t.tool).join(', ');
+    ans.innerHTML=`${d.answer.replace(/</g,'&lt;')}`+
+      (used?`<span class="used">tools used: ${used}</span>`:'')+
+      (d.ollama===false?`<span class="used off">⚠ ollama offline — install it for conversational analysis.</span>`:'');
+  }catch(e){ans.textContent='Error: '+e.message;}
+  btn.disabled=false;btn.innerHTML=old;
+}
+$('ask').onclick=askGaffer;
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')askGaffer();});
+
+/* ---- value bets ---- */
+function renderValue(d){
+  const L=d.labels||{home:'Home',draw:'Draw',away:'Away'};
+  const rows=d.assessments.map(b=>`<tr class="${b.value_bet?'hit':''}">
+    <td>${L[b.outcome]||b.outcome}</td>
+    <td class="num">${b.odds.toFixed(2)}</td>
+    <td class="num">${(b.model_prob*100).toFixed(1)}%</td>
+    <td class="num">${(b.fair_prob*100).toFixed(1)}%</td>
+    <td class="num ${b.edge>=0?'pos':'neg'}">${(b.edge*100).toFixed(1)}%</td>
+    <td class="num ${b.ev_per_unit>=0?'pos':'neg'}">${b.ev_per_unit>=0?'+':''}${b.ev_per_unit.toFixed(3)}</td>
+    <td class="num">${b.stake?b.stake.toFixed(2):'—'}</td></tr>`).join('');
+  const notes=d.assessments.filter(b=>b.note).map(b=>`<div class="vnote">⚠ ${b.note}</div>`).join('');
+  $('vout').innerHTML=`
+    <table class="vtbl"><thead><tr><th>Outcome</th><th>Odds</th><th>Model</th>
+      <th>Fair (no-vig)</th><th>Edge</th><th>EV /unit</th><th>Stake</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    <div class="verdict ${d.best_bet?'yes':''}">${d.verdict}</div>${notes}
+    <div class="ovr">bookmaker margin ${d.overround_pct??'–'}% · model ${d.model}
+      ${d.odds_source?` · ${d.odds_source.n_bookmakers} books (${d.price_used} price)`:''}</div>`;
+}
+async function findEdge(live){
+  clr();
+  const h=$('home').value,a=$('away').value;
+  if(h===a){err('Pick two different sides.');return;}
+  const base=`home=${encodeURIComponent(h)}&away=${encodeURIComponent(a)}`+
+    `&neutral=${$('neutral').checked}&bankroll=${$('bank').value}&kelly_fraction=${$('kf').value}`;
+  let url;
+  if(live){url=`/value/live?${base}`;}
+  else{
+    const oh=$('oh').value,od=$('od').value,oa=$('oa').value;
+    if(!oh||!od||!oa){err('Enter all three odds (decimal, e.g. 2.10).');return;}
+    url=`/value/manual?${base}&odds_home=${oh}&odds_draw=${od}&odds_away=${oa}`;
+  }
+  const btn=live?$('liveodds'):$('edge'),old=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Pricing';
+  try{
+    const r=await fetch(url);const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||('Error '+r.status));
+    renderValue(d);
+    if(live&&d.odds_source&&d.odds_source.best){
+      $('oh').value=d.odds_source.best.home||'';$('od').value=d.odds_source.best.draw||'';
+      $('oa').value=d.odds_source.best.away||'';}
+  }catch(e){err(e.message);}
+  btn.disabled=false;btn.innerHTML=old;
+}
+$('edge').onclick=()=>findEdge(false);
+$('liveodds').onclick=()=>findEdge(true);
+
+/* ---- WC2026 fixtures ---- */
+async function loadFixtures(){
+  try{
+    const d=await (await fetch('/wc2026/fixtures')).json();
+    $('fixtures').innerHTML=d.fixtures.map(f=>{
+      const p=f.probs;
+      return `<div class="fx"><span class="d num">${f.date}</span>
+        <span class="t">${f.home} vs ${f.away} <span class="st">· ${f.stage}${f.neutral?'':' · host adv'}</span></span>
+        <span class="pp">${(p.win*100).toFixed(0)} / ${(p.draw*100).toFixed(0)} / ${(p.loss*100).toFixed(0)}%
+          · fair ${f.fair_odds.home??'–'} / ${f.fair_odds.draw??'–'} / ${f.fair_odds.away??'–'}</span>
+        <button class="b-ghost" onclick="pick('${f.home.replace(/'/g,"\\'")}','${f.away.replace(/'/g,"\\'")}',${f.neutral})">Load</button>
+      </div>`;}).join('')||'no upcoming fixtures in backend/data/wc2026_fixtures.csv';
+  }catch(e){$('fixtures').textContent='fixtures unavailable — '+e.message;}
+}
+function pick(h,a,n){$('home').value=h;$('away').value=a;$('neutral').checked=n;
+  window.scrollTo({top:0,behavior:'smooth'});}
+loadHealth();loadTeams();loadFixtures();
+</script>
+</body>
+</html>

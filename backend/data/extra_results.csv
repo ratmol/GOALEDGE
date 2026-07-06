@@ -1,0 +1,74 @@
+date,home_team,away_team,home_score,away_score,tournament,neutral
+2016-06-10,France,Romania,2,1,UEFA Euro,False
+2016-07-02,Wales,Belgium,3,1,UEFA Euro,True
+2016-07-03,Germany,Italy,1,1,UEFA Euro,True
+2016-07-06,Portugal,Wales,2,0,UEFA Euro,True
+2016-07-07,Germany,France,0,2,UEFA Euro,False
+2016-07-10,Portugal,France,1,0,UEFA Euro,False
+2016-06-26,Chile,Argentina,0,0,Copa America,True
+2019-07-02,Brazil,Argentina,2,0,Copa America,False
+2019-07-07,Brazil,Peru,3,1,Copa America,False
+2019-06-09,Portugal,Netherlands,1,0,Nations League,False
+2021-06-11,Turkey,Italy,0,3,UEFA Euro,True
+2021-06-12,Wales,Switzerland,1,1,UEFA Euro,True
+2021-06-12,Denmark,Finland,0,1,UEFA Euro,True
+2021-06-13,Belgium,Russia,3,0,UEFA Euro,True
+2021-06-13,England,Croatia,1,0,UEFA Euro,False
+2021-06-15,Spain,Sweden,0,0,UEFA Euro,True
+2021-06-15,France,Germany,1,0,UEFA Euro,True
+2021-06-26,Italy,Austria,2,1,UEFA Euro,True
+2021-06-28,Netherlands,Czechia,0,2,UEFA Euro,True
+2021-06-28,Belgium,Portugal,1,0,UEFA Euro,True
+2021-06-29,Croatia,Spain,3,5,UEFA Euro,True
+2021-06-29,France,Switzerland,3,3,UEFA Euro,True
+2021-06-30,England,Ukraine,4,0,UEFA Euro,True
+2021-07-02,Italy,Belgium,2,1,UEFA Euro,True
+2021-07-03,Spain,Switzerland,1,1,UEFA Euro,True
+2021-07-06,Italy,Spain,1,1,UEFA Euro,True
+2021-07-07,England,Denmark,2,1,UEFA Euro,False
+2021-07-11,Italy,England,1,1,UEFA Euro,False
+2021-07-05,Brazil,Peru,1,0,Copa America,False
+2021-07-06,Argentina,Colombia,1,1,Copa America,True
+2021-07-10,Argentina,Brazil,1,0,Copa America,False
+2021-10-10,Spain,France,1,2,Nations League,True
+2022-09-23,Netherlands,Poland,2,0,Nations League,False
+2023-03-28,Germany,Belgium,2,3,Friendly,False
+2023-06-18,Croatia,Spain,0,0,Nations League,True
+2024-03-23,England,Brazil,0,1,Friendly,False
+2024-03-26,Spain,Brazil,3,3,Friendly,False
+2024-06-14,Germany,Scotland,5,1,UEFA Euro,False
+2024-06-15,Hungary,Switzerland,1,3,UEFA Euro,True
+2024-06-15,Spain,Croatia,3,0,UEFA Euro,True
+2024-06-15,Italy,Albania,2,1,UEFA Euro,True
+2024-06-16,Serbia,England,0,1,UEFA Euro,True
+2024-06-16,Netherlands,Poland,2,1,UEFA Euro,True
+2024-06-16,Slovenia,Denmark,1,1,UEFA Euro,True
+2024-06-17,Austria,France,0,1,UEFA Euro,True
+2024-06-17,Belgium,Slovakia,0,1,UEFA Euro,True
+2024-06-17,Romania,Ukraine,3,0,UEFA Euro,True
+2024-06-18,Portugal,Czechia,2,1,UEFA Euro,True
+2024-06-18,Turkey,Georgia,3,1,UEFA Euro,True
+2024-06-29,Switzerland,Italy,2,0,UEFA Euro,True
+2024-06-30,Germany,Denmark,2,0,UEFA Euro,False
+2024-07-01,England,Slovakia,2,1,UEFA Euro,True
+2024-07-01,Spain,Georgia,4,1,UEFA Euro,True
+2024-07-05,Spain,Germany,2,1,UEFA Euro,True
+2024-07-05,Portugal,France,0,0,UEFA Euro,True
+2024-07-06,England,Switzerland,1,1,UEFA Euro,True
+2024-07-06,Netherlands,Turkey,2,1,UEFA Euro,True
+2024-07-09,Spain,France,2,1,UEFA Euro,True
+2024-07-10,Netherlands,England,1,2,UEFA Euro,True
+2024-07-14,Spain,England,2,1,UEFA Euro,True
+2024-06-20,Argentina,Canada,2,0,Copa America,True
+2024-06-21,Peru,Chile,0,0,Copa America,True
+2024-06-22,Ecuador,Venezuela,1,2,Copa America,True
+2024-06-23,Colombia,Paraguay,2,1,Copa America,True
+2024-06-24,Uruguay,Panama,3,1,Copa America,True
+2024-06-25,United States,Bolivia,2,0,Copa America,False
+2024-06-26,Brazil,Costa Rica,0,0,Copa America,True
+2024-07-04,Argentina,Ecuador,1,1,Copa America,True
+2024-07-06,Colombia,Panama,5,0,Copa America,True
+2024-07-06,Uruguay,Brazil,0,0,Copa America,True
+2024-07-09,Argentina,Canada,2,0,Copa America,True
+2024-07-10,Uruguay,Colombia,0,1,Copa America,True
+2024-07-14,Argentina,Colombia,1,0,Copa America,True

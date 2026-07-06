@@ -1,0 +1,8 @@
+# FIFA World Cup 2026 — upcoming knockout fixtures (as of 2026-07-05).
+# Edit freely: the API reads this file live. neutral=False when a host nation plays.
+date,home_team,away_team,stage,neutral
+2026-07-05,Mexico,England,Round of 16,False
+2026-07-06,Portugal,Spain,Round of 16,True
+2026-07-06,United States,Belgium,Round of 16,False
+2026-07-07,Argentina,Egypt,Round of 16,True
+2026-07-07,Switzerland,Colombia,Round of 16,True
