@@ -486,10 +486,10 @@ async function askGaffer(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({question:q,home:$('home').value,away:$('away').value})});
     const d=await r.json();
-    const used=(d.tools_used||[]).map(t=>typeof t==='string'?t:t.tool).join(', ');
+    const srcs=(d.sources||[]).join(', ');
     ans.innerHTML=`${d.answer.replace(/</g,'&lt;')}`+
-      (used?`<span class="used">tools used: ${used}</span>`:'')+
-      (d.ollama===false?`<span class="used off">⚠ ollama offline — install it for conversational analysis.</span>`:'');
+      (srcs?`<span class="used">sources: ${srcs}</span>`:'')+
+      (d.ollama===false?`<span class="used off">⚠ no analyst LLM configured — set LLM_API_KEY (free hosted model) or run Ollama to enable chat.</span>`:'');
   }catch(e){ans.textContent='Error: '+e.message;}
   btn.disabled=false;btn.innerHTML=old;
 }

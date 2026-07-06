@@ -16,6 +16,8 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 
 
 class OllamaClient:
+    supports_tools = True
+
     def __init__(self, host: str = OLLAMA_HOST, model: str = OLLAMA_MODEL):
         self.host = host.rstrip("/")
         self.model = model
@@ -56,6 +58,6 @@ SYSTEM_PROMPT = (
 
 def write_preview(client: OllamaClient, prompt: str) -> str:
     if not client.available():
-        return ("[Ollama not running — install from https://ollama.com and run "
-                "`ollama pull llama3.1`. Showing the model's numbers only.]")
+        return ("[No analyst LLM configured — set LLM_API_KEY for a free "
+                "hosted model, or run Ollama locally. Showing numbers only.]")
     return client.generate(prompt, system=SYSTEM_PROMPT)
