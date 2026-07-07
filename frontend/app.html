@@ -489,6 +489,7 @@ async function askGaffer(){
     const srcs=(d.sources||[]).join(', ');
     ans.innerHTML=`${d.answer.replace(/</g,'&lt;')}`+
       (srcs?`<span class="used">sources: ${srcs}</span>`:'')+
+      (d.llm_error?`<span class="used off">⚠ LLM error: ${d.llm_error.replace(/</g,'&lt;')}</span>`:'')+
       (d.ollama===false?`<span class="used off">⚠ no analyst LLM configured — set LLM_API_KEY (free hosted model) or run Ollama to enable chat.</span>`:'');
   }catch(e){ans.textContent='Error: '+e.message;}
   btn.disabled=false;btn.innerHTML=old;

@@ -92,7 +92,15 @@ class Analyst:
             sources.append(hit["id"])
         context = "\n\n".join(ctx) if ctx else "(No specific fixture selected.)"
         prompt = f"{context}\n\nUser question: {question}"
-        answer = self.client.generate(prompt, system=SYSTEM)
+        try:
+            answer = self.client.generate(prompt, system=SYSTEM)
+        except Exception as e:
+            # LLM is configured but the call failed (bad model slug, quota, auth).
+            # Degrade to the deterministic summary and surface the real reason.
+            fb = self._fallback(question, home, away)
+            fb["ollama"] = True
+            fb["llm_error"] = str(e)[:300]
+            return fb
         return {"answer": (answer or "").strip(), "sources": sources,
                 "tools_used": ["retrieve"], "ollama": True}
 
