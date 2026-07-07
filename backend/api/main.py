@@ -41,6 +41,8 @@ from backend.models.elo import EloModel
 from backend.models.match_simulator import (build_default_simulator,
                                             MatchSimulator, TeamModel)
 from backend.llm.analyst import Analyst
+from backend.llm.provider import get_llm, describe as llm_describe
+from backend.rag.retriever import build_retriever
 from backend.llm.ollama_client import OllamaClient, write_preview
 from backend.skills.token_optimizer import TokenOptimizer
 from backend.value.engine import assess_1x2, assess_market
@@ -95,9 +97,10 @@ def _predict(home, away, neutral):
     return _elo.win_draw_loss(home, away, neutral), "elo_baseline"
 
 
-_ollama = OllamaClient()
+_llm = get_llm()
+_retriever = build_retriever(_simulator.tm)
 _optimizer = TokenOptimizer()
-_analyst = Analyst(_simulator, _ollama)
+_analyst = Analyst(_simulator, _llm, retriever=_retriever)
 
 
 def _require_teams(home: str, away: str):
@@ -137,7 +140,8 @@ def health():
             "simulator": "monte_carlo",
             "teams": len(_simulator.tm.teams),
             "matches": _simulator.tm.n_matches,
-            "ollama": _ollama.available(),
+            "llm_ready": _llm.available(),
+            "llm_provider": llm_describe(_llm),
             "odds_api": odds_api.available(),
             "training_active": _training_active}
 
@@ -166,7 +170,7 @@ def analysis(home: str, away: str, neutral: bool = True):
     opt = _optimizer.optimize(ctx, must_keep=must)
     return {"home": home, "away": away, "neutral": neutral,
             "probabilities": {k: round(v, 3) for k, v in probs.items()},
-            "model": model, "preview": write_preview(_ollama, opt.prompt),
+            "model": model, "preview": write_preview(_llm, opt.prompt),
             "prompt_tokens": opt.final_tokens}
 
 
@@ -199,7 +203,7 @@ def match_scout(home: str, away: str, neutral: bool = True,
            f"over10.5 corners {m['over_10_5_corners']}%.\n"
            "Write a punchy scout report on how this plays out.")
     opt = _optimizer.optimize(ctx, must_keep=must)
-    sim["scout_report"] = write_preview(_ollama, opt.prompt)
+    sim["scout_report"] = write_preview(_llm, opt.prompt)
     sim["prompt_tokens"] = opt.final_tokens
     return sim
 
