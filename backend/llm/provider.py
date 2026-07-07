@@ -33,14 +33,14 @@ import requests
 from backend.llm.ollama_client import OllamaClient
 
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.cerebras.ai/v1")
-LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b")
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-oss-120b")
 
 # Well-known providers auto-detected from their key env var — so just setting
 # e.g. CEREBRAS_API_KEY works with NO LLM_PROVIDERS needed. Each provides an
 # ordered model list (fast fallback within the provider).
 KNOWN_PROVIDERS = [
     ("CEREBRAS_API_KEY", "https://api.cerebras.ai/v1",
-     ["llama-3.3-70b", "llama3.1-8b"]),
+     ["gpt-oss-120b", "gemma-4-31b"]),
     ("GROQ_API_KEY", "https://api.groq.com/openai/v1",
      ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]),
     ("OPENROUTER_API_KEY", "https://openrouter.ai/api/v1",
