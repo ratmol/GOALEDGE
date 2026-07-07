@@ -35,6 +35,20 @@ from backend.llm.ollama_client import OllamaClient
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.cerebras.ai/v1")
 LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b")
 
+# Well-known providers auto-detected from their key env var — so just setting
+# e.g. CEREBRAS_API_KEY works with NO LLM_PROVIDERS needed. Each provides an
+# ordered model list (fast fallback within the provider).
+KNOWN_PROVIDERS = [
+    ("CEREBRAS_API_KEY", "https://api.cerebras.ai/v1",
+     ["llama-3.3-70b", "llama3.1-8b"]),
+    ("GROQ_API_KEY", "https://api.groq.com/openai/v1",
+     ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]),
+    ("OPENROUTER_API_KEY", "https://openrouter.ai/api/v1",
+     ["meta-llama/llama-3.3-70b-instruct:free"]),
+    ("TOGETHER_API_KEY", "https://api.together.xyz/v1",
+     ["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]),
+]
+
 
 class HostedLLM:
     """OpenAI-compatible client that tries a chain of (key, base, model)
@@ -111,6 +125,15 @@ def _endpoints_from_env() -> list[dict]:
     if simple_key:
         eps.append({"key": simple_key, "base": LLM_BASE_URL, "model": LLM_MODEL})
 
+
+    # 3) auto-detect well-known provider keys (no LLM_PROVIDERS required)
+    if not eps:
+        for key_env, base, models in KNOWN_PROVIDERS:
+            k = os.getenv(key_env, "").strip()
+            if k:
+                for m in models:
+                    eps.append({"key": k, "base": base, "model": m})
+
     return eps
 
 
@@ -143,6 +166,8 @@ def diagnose() -> dict:
             "LLM_API_KEY": bool(os.getenv("LLM_API_KEY", "").strip()),
             "CEREBRAS_API_KEY": bool(os.getenv("CEREBRAS_API_KEY", "").strip()),
             "OPENROUTER_API_KEY": bool(os.getenv("OPENROUTER_API_KEY", "").strip()),
+            "GROQ_API_KEY": bool(os.getenv("GROQ_API_KEY", "").strip()),
+            "TOGETHER_API_KEY": bool(os.getenv("TOGETHER_API_KEY", "").strip()),
         },
         "providers_json_valid": None,
         "providers_entries": 0,
