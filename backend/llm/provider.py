@@ -133,6 +133,43 @@ def describe(client) -> str:
     return "none"
 
 
+def diagnose() -> dict:
+    """Safe introspection for /health/llm — reports which env vars are SEEN
+    (booleans only, never values) and how the endpoint chain parsed."""
+    raw = os.getenv("LLM_PROVIDERS", "").strip()
+    info = {
+        "env_seen": {
+            "LLM_PROVIDERS": bool(raw),
+            "LLM_API_KEY": bool(os.getenv("LLM_API_KEY", "").strip()),
+            "CEREBRAS_API_KEY": bool(os.getenv("CEREBRAS_API_KEY", "").strip()),
+            "OPENROUTER_API_KEY": bool(os.getenv("OPENROUTER_API_KEY", "").strip()),
+        },
+        "providers_json_valid": None,
+        "providers_entries": 0,
+        "usable_endpoints": 0,
+        "missing_keys": [],
+        "notes": [],
+    }
+    if raw:
+        try:
+            items = json.loads(raw)
+            info["providers_json_valid"] = True
+            info["providers_entries"] = len(items)
+            for it in items:
+                ke = it.get("key_env", "")
+                if os.getenv(ke, "").strip():
+                    info["usable_endpoints"] += 1
+                elif ke not in info["missing_keys"]:
+                    info["missing_keys"].append(ke)
+        except Exception as e:
+            info["providers_json_valid"] = False
+            info["notes"].append(f"LLM_PROVIDERS is not valid JSON: {e}")
+    eps = _endpoints_from_env()
+    info["total_endpoints"] = len(eps)
+    info["models"] = [e["model"] for e in eps]
+    return info
+
+
 if __name__ == "__main__":
     import types
     # chain built from env, skipping missing keys

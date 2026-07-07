@@ -41,7 +41,7 @@ from backend.models.elo import EloModel
 from backend.models.match_simulator import (build_default_simulator,
                                             MatchSimulator, TeamModel)
 from backend.llm.analyst import Analyst
-from backend.llm.provider import get_llm, describe as llm_describe
+from backend.llm.provider import get_llm, describe as llm_describe, diagnose as llm_diagnose
 from backend.rag.retriever import build_retriever
 from backend.llm.ollama_client import OllamaClient, write_preview
 from backend.skills.token_optimizer import TokenOptimizer
@@ -371,6 +371,21 @@ def live():
 
 if _DIST.exists() and (_DIST / "assets").exists():
     app.mount("/assets", StaticFiles(directory=str(_DIST / "assets")), name="assets")
+
+
+@app.get("/health/llm")
+def health_llm(ping: bool = False):
+    """Diagnose why the analyst LLM is/isn't active. ?ping=true actually calls
+    the model and returns its reply or the exact error (no secrets leaked)."""
+    info = llm_diagnose()
+    info["provider"] = llm_describe(_llm)
+    info["ready"] = _llm.available()
+    if ping and _llm.available():
+        try:
+            info["ping"] = _llm.generate("Reply with exactly: OK")[:120]
+        except Exception as e:
+            info["ping_error"] = f"{type(e).__name__}: {str(e)[:200]}"
+    return info
 
 
 @app.get("/{full_path:path}", include_in_schema=False)
