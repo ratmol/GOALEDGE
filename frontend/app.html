@@ -4,17 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>GoalEdge — price the match</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230b1712' stroke='%236fd6a0' stroke-width='2'/%3E%3Cpath fill='%236fd6a0' d='M16 8.2l5.2 3.8-2 6.1h-6.4l-2-6.1z'/%3E%3Cpath stroke='%236fd6a0' stroke-width='1.7' fill='none' stroke-linecap='round' d='M16 8.2V3.2M21.2 12l4.9-1.7M19.2 18.1l3.1 4.2M12.8 18.1l-3.1 4.2M10.8 12L5.9 10.3'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0a0d0b; --bg2:#0e1210;
-    --card:rgba(255,255,255,.025);
-    --ink:#ece9e2; --muted:#93a29a; --faint:#5c6b63;
-    --line:rgba(236,233,226,.09); --line2:rgba(236,233,226,.05);
+    --bg:#0b1210; --bg2:#0f1714;
+    --card:rgba(255,255,255,.028);
+    --ink:#f1ede4; --muted:#9aa89f; --faint:#63726a;
+    --line:rgba(240,236,226,.10); --line2:rgba(240,236,226,.055);
     --accent:#6fd6a0; --accent-dim:rgba(111,214,160,.12);
-    --home:#6fd6a0; --away:#dfa963; --draw:#4b5851;
+    --gold:#f0b45c; --gold-dim:rgba(240,180,92,.14);
+    --home:#6fd6a0; --away:#f0b45c; --draw:#4b5851;
     --danger:#d98a72;
     --serif:'Fraunces',Georgia,serif;
     --sans:'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
@@ -25,8 +27,8 @@
   body{font-family:var(--sans);background:var(--bg);color:var(--ink);
     line-height:1.55;-webkit-font-smoothing:antialiased;
     background-image:
-      radial-gradient(1100px 500px at 78% -8%, rgba(111,214,160,.07), transparent 60%),
-      radial-gradient(800px 420px at -10% 30%, rgba(223,169,99,.04), transparent 55%);
+      radial-gradient(1150px 540px at 80% -12%, rgba(240,180,92,.11), transparent 62%),
+      radial-gradient(820px 440px at -8% 26%, rgba(111,214,160,.06), transparent 55%);
     background-attachment:fixed}
   .wrap{max-width:980px;margin:0 auto;padding:0 1.5rem 6rem}
   .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -86,8 +88,10 @@
   button{font-family:var(--sans);font-weight:600;font-size:.85rem;cursor:pointer;
     border-radius:999px;padding:.62rem 1.35rem;border:1px solid transparent;
     transition:all .15s ease;letter-spacing:.01em}
-  .b-primary{background:var(--accent);color:#0a1710}
-  .b-primary:hover{background:#84e2b1;transform:translateY(-1px)}
+  .b-primary{background:linear-gradient(135deg,#f6c67f,#e79a3c);color:#231507;
+    font-weight:700;box-shadow:0 6px 20px rgba(231,154,60,.26)}
+  .b-primary:hover{filter:brightness(1.06);transform:translateY(-1px);
+    box-shadow:0 9px 26px rgba(231,154,60,.36)}
   .b-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
   .b-ghost:hover{border-color:var(--accent);color:var(--accent)}
   button:disabled{opacity:.5;cursor:wait;transform:none}
@@ -245,8 +249,8 @@
   </nav>
 
   <div class="hero">
-    <div class="kicker">probabilities, not prophecies</div>
-    <h1>Price the match.<br/>Trust the <em>number</em>,<br/>not the noise.</h1>
+    <div class="kicker">welcome to the touchline</div>
+    <h1>Every match,<br/>read like a <em>pro</em>,<br/>priced like a trader.</h1>
     <p>A Dixon-Coles engine and 20,000 Monte Carlo runs behind every fixture —
        compared against your bookmaker's odds to find the few prices that are
        actually wrong. Passing is a position.</p>
