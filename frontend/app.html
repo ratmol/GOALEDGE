@@ -3,601 +3,416 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>GoalEdge — price the match</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230b1712' stroke='%236fd6a0' stroke-width='2'/%3E%3Cpath fill='%236fd6a0' d='M16 8.2l5.2 3.8-2 6.1h-6.4l-2-6.1z'/%3E%3Cpath stroke='%236fd6a0' stroke-width='1.7' fill='none' stroke-linecap='round' d='M16 8.2V3.2M21.2 12l4.9-1.7M19.2 18.1l3.1 4.2M12.8 18.1l-3.1 4.2M10.8 12L5.9 10.3'/%3E%3C/svg%3E" />
+<title>GoalEdge — read the match like a pro</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23100E08' stroke='%2312aa5c' stroke-width='2'/%3E%3Cpath fill='%2312aa5c' d='M16 8.2l5.2 3.8-2 6.1h-6.4l-2-6.1z'/%3E%3Cpath stroke='%2312aa5c' stroke-width='1.7' fill='none' stroke-linecap='round' d='M16 8.2V3.2M21.2 12l4.9-1.7M19.2 18.1l3.1 4.2M12.8 18.1l-3.1 4.2M10.8 12L5.9 10.3'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Archivo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b1210; --bg2:#0f1714;
-    --card:rgba(255,255,255,.028);
-    --ink:#f1ede4; --muted:#9aa89f; --faint:#63726a;
-    --line:rgba(240,236,226,.10); --line2:rgba(240,236,226,.055);
-    --accent:#6fd6a0; --accent-dim:rgba(111,214,160,.12);
-    --gold:#f0b45c; --gold-dim:rgba(240,180,92,.14);
-    --home:#6fd6a0; --away:#f0b45c; --draw:#4b5851;
-    --danger:#d98a72;
-    --serif:'Fraunces',Georgia,serif;
-    --sans:'Inter',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    --mono:'IBM Plex Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --paper:#EBE4D2; --card:#FFFDF7; --card2:#F1EBDB;
+    --ink:#100E08; --ink2:#403c31; --faint:#7a7466;
+    --line:#d8d0bc; --line2:#e6ded0;
+    --grn:#0a7a41; --grn-br:#12aa5c; --grn-d:#075030; --grn-soft:#dcefe1;
+    --amber:#b06d12; --amber-br:#e79320; --amber-soft:#f6e6c8; --red:#c23a1f;
+    --night:#0a1016; --glow:#8fe6b4;
+    --disp:'Copperplate','Copperplate Gothic Bold','Cinzel',Georgia,serif;
+    --body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'Space Mono',ui-monospace,Menlo,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{font-family:var(--sans);background:var(--bg);color:var(--ink);
-    line-height:1.55;-webkit-font-smoothing:antialiased;
-    background-image:
-      radial-gradient(1150px 540px at 80% -12%, rgba(240,180,92,.11), transparent 62%),
-      radial-gradient(820px 440px at -8% 26%, rgba(111,214,160,.06), transparent 55%);
-    background-attachment:fixed}
-  .wrap{max-width:980px;margin:0 auto;padding:0 1.5rem 6rem}
+  body{font-family:var(--body);background:var(--paper);color:var(--ink);
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:840px;margin:0 auto;padding:0 30px}
   .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .disp{font-family:var(--disp);letter-spacing:.04em;text-transform:uppercase}
 
-  /* ---------- top nav ---------- */
-  nav{display:flex;align-items:center;gap:1rem;padding:1.6rem 0 0}
-  nav .logo{font-family:var(--serif);font-weight:500;font-size:1.15rem;letter-spacing:.01em}
-  nav .logo b{color:var(--accent);font-weight:500}
-  nav .tag{margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--faint);
-    text-transform:lowercase;letter-spacing:.06em}
+  nav{display:flex;align-items:center;gap:.7rem;padding:22px 0}
+  nav .mark{width:32px;height:32px;border-radius:50%;background:var(--ink);display:grid;place-items:center;flex:none}
+  nav .mark svg{width:19px;height:19px}
+  nav .wm{font-family:var(--disp);font-size:1.3rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700}
+  nav .menu{margin-left:auto;display:flex;gap:24px;font-family:var(--disp);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+  @media(max-width:640px){nav .menu{display:none}}
 
-  /* ---------- hero ---------- */
-  .hero{padding:4.5rem 0 3.5rem;border-bottom:1px solid var(--line2)}
-  .hero .kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--accent);margin-bottom:1.3rem}
-  .hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.4rem,6vw,4.2rem);
-    line-height:1.06;letter-spacing:-.015em;max-width:15em}
-  .hero h1 em{font-style:italic;color:var(--accent)}
-  .hero p{margin-top:1.4rem;color:var(--muted);font-size:1rem;max-width:34em}
-  .hero .meta{margin-top:2rem;display:flex;gap:2.2rem;flex-wrap:wrap;
-    font-family:var(--mono);font-size:.72rem;color:var(--faint)}
-  .hero .meta b{color:var(--ink);font-weight:500;display:block;font-size:.95rem}
+  .hero{padding:30px 0 42px;border-bottom:3px solid var(--ink)}
+  .hero .pill{display:inline-block;font-family:var(--disp);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:#fff;background:var(--grn-d);padding:.45rem .9rem;border-radius:4px;margin-bottom:22px}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(2.3rem,6.3vw,4.3rem);line-height:1.03;
+    letter-spacing:.02em;text-transform:uppercase}
+  .hero h1 em{font-style:normal;color:var(--grn)}
+  .hero h1 .u{border-bottom:.12em solid var(--amber);padding-bottom:.02em}
+  .hero .sub{margin-top:22px;color:var(--ink2);font-size:1.1rem;max-width:32em;font-weight:500}
+  .hero .hstats{display:flex;margin-top:30px;border:2px solid var(--ink);border-radius:10px;overflow:hidden;max-width:560px}
+  .hero .hstats div{flex:1;padding:13px 18px;border-right:2px solid var(--ink)}
+  .hero .hstats div:last-child{border:none}
+  .hero .hstats b{font-family:var(--disp);font-size:1.5rem;display:block;letter-spacing:.03em}
+  .hero .hstats span{font-family:var(--disp);font-size:.62rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.09em}
 
-  /* ---------- sections ---------- */
-  section{padding-top:3.2rem}
-  .slabel{display:flex;align-items:baseline;gap:.8rem;margin-bottom:1.2rem}
-  .slabel .n{font-family:var(--mono);font-size:.72rem;color:var(--accent)}
-  .slabel h2{font-family:var(--serif);font-weight:400;font-size:1.35rem;
-    letter-spacing:.005em;text-transform:lowercase}
-  .slabel .rule{flex:1;height:1px;background:var(--line2);align-self:center}
+  .sh{display:flex;align-items:center;gap:16px;margin:38px 0 16px}
+  .sh .n{font-family:var(--disp);font-size:1.5rem;color:var(--grn);letter-spacing:.05em}
+  .sh h3{font-family:var(--disp);font-size:1.3rem;letter-spacing:.06em;text-transform:uppercase}
+  .sh .ln{flex:1;height:2px;background:var(--ink);opacity:.22}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
-    padding:1.6rem 1.7rem;margin-bottom:1rem;backdrop-filter:blur(4px)}
-  .card h3{font-family:var(--mono);font-size:.66rem;text-transform:uppercase;
-    letter-spacing:.14em;color:var(--faint);font-weight:500;margin-bottom:1.1rem}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:24px;
+    box-shadow:6px 6px 0 rgba(16,14,8,.12)}
+  .pick{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:end}
+  label{display:block;font-family:var(--disp);font-size:.68rem;color:var(--ink2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.1em}
+  select,.numin{width:100%;padding:.8rem .9rem;border-radius:10px;background:var(--card2);border:2px solid var(--ink);
+    font-family:var(--disp);font-size:1.05rem;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);cursor:pointer}
+  select:focus,.numin:focus,input:focus{outline:3px solid var(--grn-br);outline-offset:-1px}
+  .vs{font-family:var(--disp);font-size:1.1rem;color:var(--faint);padding-bottom:.85rem;text-align:center}
+  .row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .chk{display:flex;align-items:center;gap:.5rem;font-size:.9rem;font-weight:600;color:var(--ink);cursor:pointer}
+  .chk input{width:18px;height:18px;accent-color:var(--grn)}
+  .rest{display:flex;align-items:center;gap:.35rem;font-family:var(--disp);font-size:.66rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em}
+  .rest input{width:52px;padding:.35rem;border:2px solid var(--ink);border-radius:7px;font-family:var(--mono);text-align:center;font-size:.85rem}
+  .btns{margin-left:auto;display:flex;gap:.6rem}
+  button.b{font-family:var(--disp);border:2px solid var(--ink);border-radius:9px;padding:.72rem 1.35rem;font-size:.84rem;
+    text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:transform .12s}
+  button.b.p{background:var(--grn);color:#fff}
+  button.b.s{background:var(--card);color:var(--ink)}
+  button.b:hover{transform:translateY(-1px)}
+  button.b:disabled{opacity:.55;cursor:wait;transform:none}
+  .err{background:#fbe6e0;border:2px solid var(--red);color:#8a2412;border-radius:10px;padding:.9rem 1.1rem;margin-top:14px;font-weight:600}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;
+    animation:sp .7s linear infinite;vertical-align:-1px;margin-right:.4rem}
+  @keyframes sp{to{transform:rotate(360deg)}}
 
-  /* ---------- controls ---------- */
-  .controls{display:grid;grid-template-columns:1fr auto 1fr;gap:1.1rem;align-items:end}
-  label.fl{display:block;font-family:var(--mono);font-size:.64rem;text-transform:uppercase;
-    letter-spacing:.13em;color:var(--faint);margin-bottom:.45rem}
-  select,input[type=number],input[type=text]{width:100%;padding:.68rem .75rem;
-    border:1px solid var(--line);border-radius:10px;background:var(--bg2);
-    font-size:.95rem;font-weight:500;color:var(--ink);font-family:var(--sans)}
-  select{cursor:pointer;appearance:none;
-    background-image:url("data:image/svg+xml,%3Csvg width='9' height='6' viewBox='0 0 9 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='%2393a29a' stroke-width='1.4'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right .8rem center}
-  select:focus,input:focus{outline:1.5px solid var(--accent);outline-offset:-1px;border-color:transparent}
-  input[type=number]{font-family:var(--mono);font-size:.9rem}
-  .vs{font-family:var(--serif);font-style:italic;color:var(--faint);text-align:center;
-    padding-bottom:.7rem;font-size:.95rem}
-  .opts{display:flex;align-items:center;gap:1.4rem;margin-top:1.15rem;flex-wrap:wrap}
-  .chk{display:flex;align-items:center;gap:.5rem;font-size:.84rem;color:var(--muted);cursor:pointer}
-  .chk input{accent-color:var(--accent);width:15px;height:15px}
-  .rest{display:flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--muted)}
-  .rest input{width:58px;padding:.32rem .4rem;text-align:center}
-  .actions{margin-left:auto;display:flex;gap:.55rem}
-  button{font-family:var(--sans);font-weight:600;font-size:.85rem;cursor:pointer;
-    border-radius:999px;padding:.62rem 1.35rem;border:1px solid transparent;
-    transition:all .15s ease;letter-spacing:.01em}
-  .b-primary{background:linear-gradient(135deg,#f6c67f,#e79a3c);color:#231507;
-    font-weight:700;box-shadow:0 6px 20px rgba(231,154,60,.26)}
-  .b-primary:hover{filter:brightness(1.06);transform:translateY(-1px);
-    box-shadow:0 9px 26px rgba(231,154,60,.36)}
-  .b-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-  .b-ghost:hover{border-color:var(--accent);color:var(--accent)}
-  button:disabled{opacity:.5;cursor:wait;transform:none}
+  /* ===== THE READ — cinematic stadium ===== */
+  #read{display:none;margin:36px 0 0;background:var(--night);overflow:hidden;border-radius:14px;border:2px solid var(--ink)}
+  #read.show{display:block}
+  .stage{position:relative;padding:32px 26px 28px;min-height:480px;overflow:hidden}
+  .stage .sky{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 120%,#12303f 0%,#0c1a22 42%,var(--night) 78%)}
+  .stage .flood{position:absolute;top:0;width:46%;height:70%;filter:blur(22px);opacity:.55}
+  .stage .flood.l{left:-6%;background:radial-gradient(circle at 22% 0,rgba(190,235,255,.55),transparent 55%)}
+  .stage .flood.r{right:-6%;background:radial-gradient(circle at 78% 0,rgba(190,235,255,.55),transparent 55%)}
+  .stage .stands{position:absolute;left:0;right:0;top:9%;height:32%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 7px);-webkit-mask:linear-gradient(#000,transparent);mask:linear-gradient(#000,transparent);opacity:.55}
+  .stage .pitch{position:absolute;left:-6%;right:-6%;bottom:-2%;height:50%;will-change:transform;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 48px,rgba(255,255,255,.02) 48px 96px),linear-gradient(#0f6338,#0a4526 70%,#08331d);
+    transform:perspective(600px) rotateX(58deg);transform-origin:bottom;border-top:2px solid rgba(255,255,255,.25)}
+  .stage .pitch:before{content:"";position:absolute;left:50%;bottom:36%;width:118px;height:118px;transform:translateX(-50%);border:2px solid rgba(255,255,255,.28);border-radius:50%}
+  .stage .pitch:after{content:"";position:absolute;left:0;right:0;bottom:36%;height:2px;background:rgba(255,255,255,.28)}
+  .stage .tower{position:absolute;top:2%;width:3px;height:15%;background:rgba(255,255,255,.4)}
+  .stage .tower:before{content:"";position:absolute;top:-9px;left:-11px;width:24px;height:11px;border-radius:3px;background:#eff;box-shadow:0 0 24px 9px rgba(200,240,255,.6)}
+  .stage .tower.a{left:15%}.stage .tower.b{right:15%}
+  .vsc{position:relative;z-index:2}
+  .vsc .hint{font-family:var(--disp);font-size:.72rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px}
+  .versus{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:20px}
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .6s,transform .6s}
+  #read.reveal .rv{opacity:1;transform:none}
+  #read.reveal .rv:nth-child(2){transition-delay:.08s}
+  #read.reveal .d1{transition-delay:.12s}#read.reveal .d2{transition-delay:.20s}
+  #read.reveal .d3{transition-delay:.28s}#read.reveal .d4{transition-delay:.36s}#read.reveal .d5{transition-delay:.44s}
+  .team{text-align:center}
+  .team .badge{width:54px;height:54px;border-radius:14px;margin:0 auto 10px;display:grid;place-items:center;font-family:var(--disp);font-size:1.3rem;font-weight:700;color:#06140b;border:2px solid rgba(255,255,255,.25)}
+  .team.h .badge{background:var(--grn-br)}.team.a .badge{background:var(--amber-br)}
+  .team .nm{font-family:var(--disp);font-size:1.55rem;letter-spacing:.03em;text-transform:uppercase;color:#fff;line-height:1.05}
+  .team .win{font-family:var(--disp);font-size:2.6rem;letter-spacing:.02em;margin-top:2px}
+  .team.h .win{color:var(--glow)}.team.a .win{color:var(--amber-br)}
+  .team .xg{font-family:var(--disp);font-size:.68rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em}
+  .vsmid{font-family:var(--disp);font-size:1rem;color:rgba(255,255,255,.5);text-align:center}
+  .vsmid .draw{display:block;font-size:.6rem;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.08em}
+  .bcast{background:rgba(4,10,8,.62);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px 18px;margin-top:4px}
+  .brow{display:grid;grid-template-columns:62px 1fr 108px 1fr 62px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.09)}
+  .brow:last-child{border:none}
+  .brow .hv{font-family:var(--disp);font-size:1.02rem;text-align:right;color:#fff;letter-spacing:.02em}
+  .brow .av{font-family:var(--disp);font-size:1.02rem;color:#fff;letter-spacing:.02em}
+  .brow .lb{font-family:var(--disp);text-align:center;font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.6)}
+  .track{height:6px;border-radius:4px;background:rgba(255,255,255,.14);position:relative}
+  .track.l>span{position:absolute;right:0;height:100%;border-radius:4px;background:var(--glow)}
+  .track.r>span{position:absolute;left:0;height:100%;border-radius:4px;background:var(--amber-br)}
+  .lh{color:var(--glow)!important}.la{color:var(--amber-br)!important}
+  .mkts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px}
+  .mk{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 12px;text-align:center}
+  .mk .v{font-family:var(--disp);font-size:1.3rem;color:#fff}
+  .mk .k{font-family:var(--disp);font-size:.58rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+  .gaffer{margin-top:16px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .gaffer .gt{font-family:var(--disp);font-size:1.02rem;color:#fff;text-transform:uppercase;letter-spacing:.05em}
+  .info{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--glow);color:var(--glow);display:grid;place-items:center;
+    font-family:Georgia,serif;font-size:.8rem;font-style:italic;font-weight:700;cursor:pointer;position:relative}
+  .info .tip{position:absolute;left:0;top:135%;width:320px;max-width:78vw;background:#0c1a14;border:1px solid rgba(143,230,180,.35);
+    border-radius:12px;padding:15px 17px;color:#e4f5ea;font-size:.92rem;line-height:1.6;font-style:normal;font-weight:400;
+    font-family:var(--body);text-transform:none;letter-spacing:0;opacity:0;visibility:hidden;transition:.18s;box-shadow:0 22px 44px -18px #000;z-index:5}
+  .info.open .tip,.info:hover .tip{opacity:1;visibility:visible}
+  .info .tip b{color:var(--glow)}
+  .hoverhint{font-family:var(--disp);font-size:.62rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em}
 
-  /* ---------- match output ---------- */
-  #out{display:none;margin-top:1rem}
-  .mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem}
-  .mh .side{flex:1}
-  .mh .side.r{text-align:right}
-  .mh .tn{font-family:var(--serif);font-weight:400;font-size:1.7rem;letter-spacing:-.01em}
-  .mh .tn.h{color:var(--home)} .mh .tn.a{color:var(--away)}
-  .mh .xg{font-family:var(--mono);font-size:.74rem;color:var(--muted);margin-top:.2rem}
-  .mh .mid{padding:.5rem 1rem 0;text-align:center;color:var(--faint);
-    font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.14em}
-  .pbar{display:flex;height:38px;border-radius:10px;overflow:hidden;
-    font-size:.8rem;font-weight:600;border:1px solid var(--line)}
-  .pbar div{display:flex;align-items:center;justify-content:center;color:#0a0d0b}
-  .pbar .h{background:var(--home)} .pbar .d{background:var(--draw);color:var(--ink)}
-  .pbar .a{background:var(--away)}
-  .pkey{display:flex;justify-content:space-between;margin-top:.5rem;
-    font-family:var(--mono);font-size:.68rem;color:var(--muted)}
-  .forms{display:flex;justify-content:space-between;margin-top:1.25rem;
-    padding-top:1.1rem;border-top:1px solid var(--line2)}
-  .fcol .ttl{font-family:var(--mono);font-size:.62rem;text-transform:uppercase;
-    letter-spacing:.12em;color:var(--faint);margin-bottom:.45rem}
-  .fcol.r{text-align:right}
-  .pills{display:flex;gap:.28rem}
-  .fcol.r .pills{justify-content:flex-end}
-  .pill{width:23px;height:23px;border-radius:7px;display:grid;place-items:center;
-    font-size:.7rem;font-weight:700;color:#0a0d0b}
-  .pill.W{background:var(--home)} .pill.D{background:var(--draw);color:var(--ink)}
-  .pill.L{background:var(--danger)}
-  .frate{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.4rem}
+  /* ask the gaffer */
+  .ask .arow{display:flex;gap:.6rem}
+  .ask input.q{flex:1;padding:.85rem .95rem;border-radius:10px;background:var(--card2);border:2px solid var(--ink);font-size:1rem;font-family:var(--body)}
+  #answer{display:none;margin-top:14px}
+  #answer.show{display:block}
+  #answer .ab{line-height:1.7;font-size:.98rem;color:var(--ink)}
+  #answer .loading{display:flex;align-items:center;gap:.5rem;color:var(--faint);font-style:italic}
+  #answer .meta{margin-top:.8rem;padding-top:.7rem;border-top:2px solid var(--line);display:flex;flex-direction:column;gap:.3rem}
+  #answer .used{font-family:var(--mono);font-size:.68rem;color:var(--faint)}
+  #answer .off{color:var(--red)}
 
-  table{width:100%;border-collapse:collapse}
-  .stat-tbl td{padding:.55rem 0;font-size:.9rem;border-bottom:1px solid var(--line2)}
-  .stat-tbl tr:last-child td{border-bottom:none}
-  .stat-tbl .lbl{text-align:center;color:var(--faint);font-family:var(--mono);
-    font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;width:34%}
-  .stat-tbl .hv{text-align:right;font-weight:600;width:14%}
-  .stat-tbl .av{text-align:left;font-weight:600;width:14%}
-  .stat-tbl .hv.lead{color:var(--home)} .stat-tbl .av.lead{color:var(--away)}
-  .minibar{display:flex;height:4px;border-radius:2px;overflow:hidden;
-    background:var(--line2);width:19%}
-  .minibar.l{margin-left:auto}
-  .minibar .mh2{background:var(--home);margin-left:auto}
-  .minibar .ma2{background:var(--away)}
+  /* value */
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .vres{margin-top:14px;display:none}
+  .vres.show{display:block}
+  .vres .vc{background:var(--card2);border:2px solid var(--ink);border-radius:10px;padding:12px 14px;text-align:center}
+  .vres .vc .v{font-family:var(--disp);font-size:1.4rem}
+  .vres .vc .k{font-family:var(--disp);font-size:.6rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em}
+  .pos{color:var(--grn)} .neg{color:var(--red)}
 
-  .mkts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem}
-  .mk{border:1px solid var(--line);border-radius:12px;padding:.85rem .95rem;
-    background:var(--bg2)}
-  .mk .mv{font-family:var(--serif);font-size:1.45rem;font-weight:400;color:var(--ink)}
-  .mk .mk-k{font-family:var(--mono);font-size:.64rem;color:var(--faint);
-    text-transform:lowercase;letter-spacing:.04em;margin-top:.2rem}
+  /* live strip */
+  #scores{display:flex;gap:10px;overflow-x:auto;padding-bottom:.4rem}
+  .sc-note{color:var(--ink2);font-size:.9rem;padding:.4rem 0}
+  .match{flex:0 0 auto;min-width:170px;background:var(--card);border:2px solid var(--ink);border-radius:11px;padding:.7rem .8rem}
+  .match .comp{font-family:var(--disp);font-size:.56rem;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  .match .tm{display:flex;justify-content:space-between;gap:.6rem;font-weight:600}
+  .match .tm .s{font-family:var(--mono);font-weight:700}
+  .match .ft{margin-top:.5rem;font-family:var(--disp);font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:.35rem}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pl 1.2s infinite}
+  .b-live{color:var(--red)} .b-ft{color:var(--faint)} .b-ko{color:var(--ink2)}
+  @keyframes pl{0%,100%{opacity:1}50%{opacity:.25}}
 
-  .scores{display:flex;gap:.55rem;flex-wrap:wrap}
-  .sc{border:1px solid var(--line);border-radius:999px;padding:.45rem .85rem;
-    font-weight:600;font-size:.88rem;background:var(--bg2)}
-  .sc .scp{color:var(--faint);font-weight:400;font-size:.74rem;margin-left:.4rem}
-
-  .scout{line-height:1.7;font-size:.94rem;white-space:pre-wrap;color:#c9cec7}
-  .cov{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:.6rem;line-height:1.7}
-  .cov .ok{color:var(--accent)}
-  .err{background:rgba(217,138,114,.08);border:1px solid rgba(217,138,114,.35);
-    color:var(--danger);border-radius:12px;padding:.9rem 1.1rem;margin-top:1rem;font-size:.88rem}
-  .sp{display:inline-block;width:12px;height:12px;border:2px solid currentColor;
-    border-top-color:transparent;border-radius:50%;animation:r .7s linear infinite;
-    vertical-align:-1px;margin-right:.45rem}
-  @keyframes r{to{transform:rotate(360deg)}}
-
-  /* ---------- value panel ---------- */
-  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:.9rem}
-  .vrow2{display:flex;gap:1rem;align-items:end;flex-wrap:wrap}
-  .vrow2 .f{flex:0 0 130px}
-  .vtbl{margin-top:1.1rem;font-size:.86rem}
-  .vtbl th{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;
-    letter-spacing:.12em;color:var(--faint);font-weight:500;text-align:right;
-    padding:.4rem .45rem;border-bottom:1px solid var(--line)}
-  .vtbl th:first-child{text-align:left}
-  .vtbl td{padding:.55rem .45rem;text-align:right;border-bottom:1px solid var(--line2)}
-  .vtbl td:first-child{text-align:left;font-weight:600}
-  .vtbl tr.hit{background:var(--accent-dim)}
-  .pos{color:var(--accent);font-weight:600}.neg{color:var(--danger)}
-  .verdict{margin-top:1rem;padding:.85rem 1rem;border-radius:12px;font-weight:600;
-    font-size:.9rem;background:var(--line2);color:var(--muted);
-    border:1px solid var(--line)}
-  .verdict.yes{background:var(--accent-dim);color:var(--accent);
-    border-color:rgba(111,214,160,.3)}
-  .vnote{font-family:var(--mono);font-size:.7rem;color:var(--away);margin-top:.5rem}
-  .ovr{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:.6rem}
-
-  /* ---------- fixtures ---------- */
-  .fx{display:flex;align-items:center;gap:.8rem;padding:.75rem 0;
-    border-bottom:1px solid var(--line2);font-size:.9rem;flex-wrap:wrap}
-  .fx:last-child{border-bottom:none}
-  .fx .d{color:var(--faint);font-family:var(--mono);font-size:.68rem;width:86px}
-  .fx .t{font-weight:600;flex:1;min-width:210px}
-  .fx .t .st{color:var(--faint);font-weight:400;font-size:.78rem}
-  .fx .pp{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
-  .fx button{padding:.32rem .85rem;font-size:.72rem}
-
-  /* ---------- ask ---------- */
-  .askrow{display:flex;gap:.6rem}
-  .askrow input{flex:1;padding:.7rem .9rem}
-  .answer{margin-top:1rem;display:none}
-  .answer.show{display:block}
-  .answer .ans-body{line-height:1.75;font-size:.95rem;color:#dfe4dc;
-    white-space:pre-wrap}
-  .answer .loading{display:flex;align-items:center;gap:.5rem;color:var(--faint);
-    font-size:.9rem;font-style:italic}
-  .answer .ans-meta{margin-top:.9rem;padding-top:.7rem;
-    border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:.35rem}
-  .answer .used{font-family:var(--mono);font-size:.66rem;color:var(--faint);
-    letter-spacing:.02em}
-  .answer .off{color:var(--away)}
-
-  footer{margin-top:5rem;padding-top:2rem;border-top:1px solid var(--line2);
-    display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;
-    font-family:var(--mono);font-size:.68rem;color:var(--faint);line-height:1.8}
-  footer .fr{text-align:right}
-  @media (max-width:640px){
-    .controls{grid-template-columns:1fr}
-    .vs{padding:.2rem 0}
-    .vgrid{grid-template-columns:1fr}
-    footer{flex-direction:column} footer .fr{text-align:left}
-  }
-  /* live scoreboard */
-  .scoreboard{display:flex;gap:.6rem;overflow-x:auto;padding-bottom:.5rem}
-  .sc-note{color:var(--muted);font-size:.9rem;padding:.5rem 0}
-  .sc-note a{color:var(--accent)}
-  .match{flex:0 0 auto;min-width:172px;background:var(--card);
-    border:1px solid var(--line);border-radius:12px;padding:.7rem .8rem}
-  .match .comp{font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;
-    color:var(--faint);font-weight:700;margin-bottom:.5rem;white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis;max-width:150px}
-  .match .teams{display:flex;flex-direction:column;gap:.25rem;font-size:.92rem}
-  .match .t{display:flex;justify-content:space-between;gap:.7rem}
-  .match .t .sc{font-family:var(--mono);font-weight:700}
-  .match .foot{margin-top:.55rem;display:flex;align-items:center;gap:.4rem;
-    font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-  .dot{width:7px;height:7px;border-radius:50%;background:var(--danger);
-    animation:scpulse 1.2s infinite}
-  .badge-live{color:var(--danger)} .badge-ft{color:var(--faint)}
-  .badge-ko{color:var(--muted)}
-  @keyframes scpulse{0%,100%{opacity:1}50%{opacity:.25}}
-  @media (prefers-reduced-motion: reduce){.dot{animation:none}}
+  footer{border-top:3px solid var(--ink);margin-top:44px;padding:22px 0 34px;
+    font-family:var(--disp);font-size:.62rem;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;text-align:center;line-height:1.9}
+  @media(prefers-reduced-motion:reduce){.rv{transition:none;opacity:1;transform:none}.dot{animation:none}.spin{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-
   <nav>
-    <span class="logo">goal<b>edge</b></span>
-    <span class="tag">the gaffer's match lab</span>
+    <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#EBE4D2" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l3.5 2.5-1.4 4h-4.2l-1.4-4z"/><path d="M12 7V3M15.5 9.5l3.5-1.2M14.1 13.5l2.2 3M9.9 13.5l-2.2 3M8.5 9.5L5 8.3"/></svg></span>
+    <span class="wm">GoalEdge</span>
+    <span class="menu"><span>Predict</span><span>The Gaffer</span></span>
   </nav>
 
-  <div class="hero">
-    <div class="kicker">welcome to the touchline</div>
-    <h1>Every match,<br/>read like a <em>pro</em>,<br/>priced like a trader.</h1>
-    <p>A Dixon-Coles engine and 20,000 Monte Carlo runs behind every fixture —
-       compared against your bookmaker's odds to find the few prices that are
-       actually wrong. Passing is a position.</p>
-    <div class="meta">
-      <span><b id="m-matches">–</b>matches in data</span>
-      <span><b id="m-teams">–</b>teams rated</span>
-      <span><b id="m-model">–</b>model</span>
-      <span><b>20k</b>simulations / match</span>
+  <header class="hero">
+    <span class="pill">Welcome to the touchline</span>
+    <h1>Read the match<br>like a <em>pro</em>.<br>Price it like a <span class="u">trader</span>.</h1>
+    <p class="sub">Pick two teams and get the whole story — who wins, the goals, corners, cards, and where the bookmakers have it wrong.</p>
+    <div class="hstats">
+      <div><b class="num" id="m-matches">–</b><span>Matches</span></div>
+      <div><b class="num" id="m-teams">–</b><span>Teams</span></div>
+      <div><b class="num">20K</b><span>Sims / match</span></div>
     </div>
-  </div>
+  </header>
 
   <section>
-    <div class="slabel"><span class="n">live</span><h2>on now &amp; recent</h2><span class="rule"></span></div>
-    <div id="scores" class="scoreboard"><span class="sc-note">loading scores…</span></div>
-  </section>
-
-  <section>
-    <div class="slabel"><span class="n">01.</span><h2>the matchup</h2><span class="rule"></span></div>
+    <div class="sh"><span class="n">I</span><h3>The Matchup</h3><span class="ln"></span></div>
     <div class="card">
-      <div class="controls">
-        <div>
-          <label class="fl" for="home">Home / first side</label>
-          <select id="home"></select>
-        </div>
-        <div class="vs">vs</div>
-        <div>
-          <label class="fl" for="away">Away / second side</label>
-          <select id="away"></select>
-        </div>
+      <div class="pick">
+        <div><label for="home">Home</label><select id="home"></select></div>
+        <div class="vs">VS</div>
+        <div><label for="away">Away</label><select id="away"></select></div>
       </div>
-      <div class="opts">
+      <div class="row">
         <label class="chk"><input type="checkbox" id="neutral" checked /> Neutral venue</label>
-        <span class="rest">Rest — H<input type="number" id="rh" value="4" min="1" max="14"/></span>
+        <span class="rest">Rest H<input type="number" id="rh" value="4" min="1" max="14"/></span>
         <span class="rest">A<input type="number" id="ra" value="4" min="1" max="14"/></span>
-        <div class="actions">
-          <button class="b-ghost" id="scout">Scout report</button>
-          <button class="b-primary" id="run">Run model</button>
+        <div class="btns">
+          <button class="b s" id="scout">Scout</button>
+          <button class="b p" id="run">Run the model</button>
         </div>
       </div>
+      <div id="err"></div>
     </div>
-    <div id="err"></div>
-    <div id="out"></div>
   </section>
 
-  <section>
-    <div class="slabel"><span class="n">02.</span><h2>value check</h2><span class="rule"></span></div>
+  <section id="read">
+    <div class="stage">
+      <div class="sky"></div><div class="flood l"></div><div class="flood r"></div>
+      <div class="tower a"></div><div class="tower b"></div><div class="stands"></div>
+      <div class="pitch" id="pitch"></div>
+      <div class="vsc" id="readbody"></div>
+    </div>
+  </section>
+
+  <section class="ask">
+    <div class="sh"><span class="n">II</span><h3>Ask the Gaffer</h3><span class="ln"></span></div>
     <div class="card">
-      <h3>model vs your bookmaker — edge · EV · kelly stake</h3>
-      <div class="vgrid">
-        <div><label class="fl">Home win odds</label><input id="oh" type="number" step="0.01" min="1.01" placeholder="2.10"/></div>
-        <div><label class="fl">Draw odds</label><input id="od" type="number" step="0.01" min="1.01" placeholder="3.40"/></div>
-        <div><label class="fl">Away win odds</label><input id="oa" type="number" step="0.01" min="1.01" placeholder="3.60"/></div>
+      <div class="arow">
+        <input class="q" id="q" placeholder="Why would Spain dominate corners? Is this a low-scoring game?" />
+        <button class="b p" id="askbtn">Ask</button>
       </div>
-      <div class="vrow2">
-        <div class="f"><label class="fl">Bankroll</label><input id="bank" type="number" value="100" min="1"/></div>
-        <div class="f"><label class="fl">Kelly</label>
-          <select id="kf"><option value="0.25" selected>¼ kelly · sane</option>
-            <option value="0.5">½ kelly · bold</option>
-            <option value="0.125">⅛ kelly · careful</option></select></div>
-        <div class="actions" style="margin-left:auto">
-          <button class="b-ghost" id="liveodds">Live odds</button>
-          <button class="b-primary" id="edge">Find edge</button>
-        </div>
-      </div>
-      <div id="vout"></div>
+      <div id="answer"></div>
     </div>
   </section>
 
   <section>
-    <div class="slabel"><span class="n">03.</span><h2>world cup 2026</h2><span class="rule"></span></div>
+    <div class="sh"><span class="n">III</span><h3>Find the Value</h3><span class="ln"></span></div>
     <div class="card">
-      <h3>upcoming knockout fixtures — model probabilities &amp; fair odds</h3>
-      <div id="fixtures" class="cov">loading…</div>
+      <p style="color:var(--ink2);font-size:.92rem;margin-bottom:14px">Enter a bookmaker's decimal odds — the model tells you the edge, expected value and a fractional-Kelly stake.</p>
+      <div class="grid3">
+        <div><label>Home odds</label><input class="numin" id="oh" type="number" step="0.01" min="1.01" placeholder="2.10"/></div>
+        <div><label>Draw odds</label><input class="numin" id="od" type="number" step="0.01" min="1.01" placeholder="3.40"/></div>
+        <div><label>Away odds</label><input class="numin" id="oa" type="number" step="0.01" min="1.01" placeholder="3.60"/></div>
+      </div>
+      <div class="row"><div class="btns" style="margin-left:0"><button class="b p" id="edge">Find the edge</button></div></div>
+      <div class="vres grid3" id="vres"></div>
     </div>
   </section>
 
   <section>
-    <div class="slabel"><span class="n">04.</span><h2>ask the gaffer</h2><span class="rule"></span></div>
-    <div class="card">
-      <div class="askrow">
-        <input id="q" type="text" placeholder="e.g. Is Portugal vs Spain a low-scoring game? Where's the corner value?" />
-        <button class="b-primary" id="ask">Ask</button>
-      </div>
-      <div id="answer" class="answer"></div>
-    </div>
+    <div class="sh"><span class="n">IV</span><h3>On Now &amp; Recent</h3><span class="ln"></span></div>
+    <div id="scores"><span class="sc-note">loading scores…</span></div>
   </section>
 
   <footer>
-    <div>
-      goal rates fitted on real results — world cup, euros, copa américa,<br/>
-      nations league &amp; friendlies · competition- and recency-weighted.<br/>
-      secondary stats modelled where no team profile exists.
-    </div>
-    <div class="fr">
-      a NO BET verdict is the model working, not failing.<br/>
-      bet what you can lose · never chase · mind your jurisdiction.
-    </div>
+    Fitted on real results · World Cup · Euros · Copa América · Nations League<br>
+    Probabilities are model estimates, not betting advice
   </footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
+const esc=t=>String(t==null?'':t).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+const badge=t=>t.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase();
+function err(m){$('err').innerHTML=`<div class="err">${esc(m)}</div>`}
+function clr(){$('err').innerHTML=''}
 
 async function loadHealth(){
-  try{
-    const h=await (await fetch('/health')).json();
-    $('m-matches').textContent=h.matches; $('m-teams').textContent=h.teams;
-    $('m-model').textContent=h.model==='phase1_blend'?'DC + XGB':'elo';
-    if(h.odds_api===false){
-      const b=$('liveodds');
-      if(b){b.disabled=true;b.textContent='Live odds (add key)';
-        b.title='Set ODDS_API_KEY (free at the-odds-api.com) to pull live odds. Meanwhile, type odds in manually.';}
-    }
+  try{const h=await(await fetch('/health')).json();
+    $('m-matches').textContent=(h.matches||0).toLocaleString();
+    $('m-teams').textContent=h.teams||'–';
   }catch(e){}
 }
 async function loadTeams(){
-  try{
-    const {teams}=await (await fetch('/teams')).json();
-    for(const t of teams){$('home').add(new Option(t,t));$('away').add(new Option(t,t));}
+  try{const {teams}=await(await fetch('/teams')).json();
+    for(const t of teams){$('home').add(new Option(t,t));$('away').add(new Option(t,t))}
     $('home').value=teams.includes('Spain')?'Spain':teams[0];
     $('away').value=teams.includes('England')?'England':teams[1];
-  }catch(e){err('Could not load teams — is the API running?');}
-}
-function err(m){$('err').innerHTML=`<div class="err">${m}</div>`;}
-function clr(){$('err').innerHTML='';}
-
-function pills(arr){return (arr||[]).map(r=>`<span class="pill ${r}">${r}</span>`).join('');}
-function lead(h,a){return h>a?['lead','']:a>h?['','lead']:['',''];}
-
-function statRow(label,h,a,unit=''){
-  const [lh,la]=lead(h,a);
-  const tot=(Math.abs(h)+Math.abs(a))||1;
-  const hp=Math.abs(h)/tot*100, ap=Math.abs(a)/tot*100;
-  return `<tr>
-    <td class="hv ${lh} num">${h}${unit}</td>
-    <td><div class="minibar l"><div class="mh2" style="width:${hp}%"></div></div></td>
-    <td class="lbl">${label}</td>
-    <td><div class="minibar"><div class="ma2" style="width:${ap}%"></div></div></td>
-    <td class="av ${la} num">${a}${unit}</td>
-  </tr>`;
-}
-function mk(k,v,s='%'){return `<div class="mk"><div class="mv num">${v}${s}</div><div class="mk-k">${k}</div></div>`;}
-
-function render(d){
-  const h=d.fixture.home,a=d.fixture.away,o=d.outcome,ts=d.team_stats,m=d.markets,cv=d.data_coverage;
-  const fh=d.form.home,fa=d.form.away;
-  $('out').innerHTML=`
-   <div class="card">
-     <div class="mh">
-       <div class="side"><div class="tn h">${h}</div>
-         <div class="xg">xG <span class="num">${ts.expected_goals.home}</span></div></div>
-       <div class="mid">expected<br/>goals</div>
-       <div class="side r"><div class="tn a">${a}</div>
-         <div class="xg">xG <span class="num">${ts.expected_goals.away}</span></div></div>
-     </div>
-     <div class="pbar">
-       <div class="h" style="width:${o.home_win}%">${o.home_win>7?o.home_win+'%':''}</div>
-       <div class="d" style="width:${o.draw}%">${o.draw>7?o.draw+'%':''}</div>
-       <div class="a" style="width:${o.away_win}%">${o.away_win>7?o.away_win+'%':''}</div>
-     </div>
-     <div class="pkey"><span>${h} win</span><span>draw</span><span>${a} win</span></div>
-     <div class="forms">
-       <div class="fcol"><div class="ttl">${h} — recent form</div>
-         <div class="pills">${pills(fh.last5)}</div>
-         <div class="frate">form index <span class="num">${fh.rating>0?'+':''}${fh.rating}</span></div></div>
-       <div class="fcol r"><div class="ttl">${a} — recent form</div>
-         <div class="pills">${pills(fa.last5)}</div>
-         <div class="frate">form index <span class="num">${fa.rating>0?'+':''}${fa.rating}</span></div></div>
-     </div>
-   </div>
-
-   <div class="card">
-     <h3>projected match stats</h3>
-     <table class="stat-tbl">
-       ${statRow('Possession',ts.possession.home,ts.possession.away,'%')}
-       ${statRow('Shots',ts.shots.home,ts.shots.away)}
-       ${statRow('On target',ts.shots_on_target.home,ts.shots_on_target.away)}
-       ${statRow('Corners',ts.corners.home,ts.corners.away)}
-       ${statRow('Fouls',ts.fouls.home,ts.fouls.away)}
-       ${statRow('Yellow cards',ts.yellow_cards.home,ts.yellow_cards.away)}
-       ${statRow('Offsides',ts.offsides.home,ts.offsides.away)}
-     </table>
-     <div class="cov">based on <span class="num">${cv.matches}</span> matches across
-       ${cv.competitions.length} competitions ·
-       ${h} <span class="num">${cv.home_matches_in_data}</span> /
-       ${a} <span class="num">${cv.away_matches_in_data}</span> in data
-       ${cv.profile_home||cv.profile_away?` · <span class="ok">✓ real stat profile</span> for ${[cv.profile_home?h:null,cv.profile_away?a:null].filter(Boolean).join(' & ')}`:''}</div>
-   </div>
-
-   <div class="card">
-     <h3>markets</h3>
-     <div class="mkts">
-       ${mk('total goals',m.total_goals_avg,'')}
-       ${mk('over 2.5 goals',m.over_2_5_goals)}
-       ${mk('both teams score',m.btts_yes)}
-       ${mk('total corners',m.total_corners_avg,'')}
-       ${mk('over 10.5 corners',m.over_10_5_corners)}
-       ${mk('total cards',m.total_cards_avg,'')}
-       ${mk('over 3.5 cards',m.over_3_5_cards)}
-       ${mk('red card shown',m.red_card_shown)}
-       ${mk(h+' clean sheet',m.home_clean_sheet)}
-       ${mk(a+' clean sheet',m.away_clean_sheet)}
-     </div>
-   </div>
-
-   <div class="card">
-     <h3>most likely scorelines</h3>
-     <div class="scores">
-       ${d.scorelines.map(s=>`<span class="sc num">${s.score}<span class="scp">${s.prob}%</span></span>`).join('')}
-     </div>
-   </div>
-
-   ${d.scout_report?`<div class="card"><h3>the gaffer's read</h3>
-      <div class="scout">${d.scout_report}</div></div>`:''}
-  `;
-  $('out').style.display='block';
+  }catch(e){err('Could not load teams — is the API running?')}
 }
 
-async function call(url,btn,label){
+/* ---- run the model / scout ---- */
+function q(){return `home=${encodeURIComponent($('home').value)}&away=${encodeURIComponent($('away').value)}&neutral=${$('neutral').checked}&rest_home=${$('rh').value}&rest_away=${$('ra').value}`}
+function stat(lb,h,a,unit=''){
+  const H=+h,A=+a,tot=(Math.abs(H)+Math.abs(A))||1,hp=Math.abs(H)/tot*100,ap=Math.abs(A)/tot*100;
+  const lh=H>A?'lh':'',la=A>H?'la':'';
+  return `<div class="brow rv"><span class="hv ${lh} num">${h}${unit}</span><span class="track l"><span style="width:${hp}%"></span></span><span class="lb">${lb}</span><span class="track r"><span style="width:${ap}%"></span></span><span class="av ${la} num">${a}${unit}</span></div>`;
+}
+function mk(k,v,s=''){return `<div class="mk rv"><div class="v num">${v}${s}</div><div class="k">${k}</div></div>`}
+
+function renderRead(d,scout){
+  const h=d.fixture.home,a=d.fixture.away,o=d.outcome,ts=d.team_stats,m=d.markets;
+  const eg=d.expected_goals;
+  const readTxt=scout||"Run the scout report for the Gaffer's written take on this one.";
+  $('readbody').innerHTML=`
+    <div class="hint">II — The Read · Full-time projection</div>
+    <div class="versus">
+      <div class="team h rv"><div class="badge">${badge(h)}</div><div class="nm">${esc(h)}</div><div class="win num">${o.home_win}%</div><div class="xg">xG ${eg.home}</div></div>
+      <div class="vsmid rv">VS<span class="draw">DRAW ${o.draw}%</span></div>
+      <div class="team a rv"><div class="badge">${badge(a)}</div><div class="nm">${esc(a)}</div><div class="win num">${o.away_win}%</div><div class="xg">xG ${eg.away}</div></div>
+    </div>
+    <div class="bcast">
+      ${stat('Possession %',ts.possession.home,ts.possession.away)}
+      ${stat('Shots',ts.shots.home,ts.shots.away)}
+      ${stat('Corners',ts.corners.home,ts.corners.away)}
+      ${stat('Yellows',ts.yellow_cards.home,ts.yellow_cards.away)}
+    </div>
+    <div class="mkts">
+      ${mk('Total goals',m.total_goals_avg)}
+      ${mk('Over 2.5',m.over_2_5_goals,'%')}
+      ${mk('Both score',m.btts_yes,'%')}
+      ${mk('Corners',m.total_corners_avg)}
+      ${mk('Over 10.5 crn',m.over_10_5_corners,'%')}
+      ${mk('Cards',m.total_cards_avg)}
+    </div>
+    <div class="gaffer rv">
+      <span class="gt">The Gaffer's Read</span>
+      <span class="info" id="ginfo">i<span class="tip">${esc(readTxt)}</span></span>
+      <span class="hoverhint">hover / tap</span>
+    </div>`;
+  const read=$('read');read.classList.add('show');
+  $('ginfo').addEventListener('click',()=>$('ginfo').classList.toggle('open'));
+  requestAnimationFrame(()=>{read.classList.remove('reveal');requestAnimationFrame(()=>read.classList.add('reveal'))});
+  read.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function call(url,btn,label,scout){
   clr();
-  if($('home').value===$('away').value){err('Pick two different sides.');return;}
-  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML=`<span class="sp"></span>${label}`;
+  if($('home').value===$('away').value){err('Pick two different sides.');return}
+  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML=`<span class="spin"></span>${label}`;
   try{
-    const q=`home=${encodeURIComponent($('home').value)}&away=${encodeURIComponent($('away').value)}`+
-            `&neutral=${$('neutral').checked}&rest_home=${$('rh').value}&rest_away=${$('ra').value}`;
-    const r=await fetch(`${url}?${q}`);
-    if(!r.ok)throw new Error('Model error '+r.status);
-    render(await r.json());
-  }catch(e){err(e.message);}
+    const r=await fetch(`${url}?${q()}`);const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||('Error '+r.status));
+    renderRead(d,scout?d.scout_report:null);
+  }catch(e){err(e.message)}
   btn.disabled=false;btn.innerHTML=old;
 }
-$('run').onclick=e=>call('/match/full',e.currentTarget,'Running');
-$('scout').onclick=e=>call('/match/scout',e.currentTarget,'Scouting');
+$('run').onclick=e=>call('/match/full',e.currentTarget,'Running',false);
+$('scout').onclick=e=>call('/match/scout',e.currentTarget,'Scouting',true);
 
+/* ---- ask the gaffer ---- */
 async function askGaffer(){
-  const q=$('q').value.trim(); if(!q)return;
-  const btn=$('ask'),ans=$('answer'),old=btn.innerHTML;
-  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Thinking';
-  ans.className='answer show';
-  ans.innerHTML='<div class="loading"><span class="sp"></span>the gaffer is reading the match…</div>';
-  const esc=t=>String(t).replace(/</g,'&lt;');
+  const question=$('q').value.trim();if(!question)return;
+  const btn=$('askbtn'),ans=$('answer'),old=btn.innerHTML;
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>Thinking';
+  ans.className='show';ans.innerHTML='<div class="loading"><span class="spin"></span>the gaffer is reading the match…</div>';
   try{
-    const r=await fetch('/analyst/ask',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({question:q,home:$('home').value,away:$('away').value})});
+    const r=await fetch('/analyst/ask',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question,home:$('home').value,away:$('away').value})});
     const d=await r.json();
     const srcs=(d.sources||[]).join(', ');
     const meta=(srcs?`<span class="used">sources: ${esc(srcs)}</span>`:'')+
       (d.llm_error?`<span class="used off">⚠ ${esc(d.llm_error)}</span>`:'')+
-      (d.ollama===false?`<span class="used off">⚠ no analyst LLM configured — set a provider key (e.g. CEREBRAS_API_KEY) or run Ollama.</span>`:'');
-    ans.innerHTML=`<div class="ans-body">${esc(d.answer)}</div>`+
-      (meta?`<div class="ans-meta">${meta}</div>`:'');
-  }catch(e){ans.innerHTML='<div class="ans-body off">Error: '+esc(e.message)+'</div>';}
+      (d.ollama===false?`<span class="used off">⚠ analyst LLM not configured</span>`:'');
+    ans.innerHTML=`<div class="ab">${esc(d.answer)}</div>`+(meta?`<div class="meta">${meta}</div>`:'');
+  }catch(e){ans.innerHTML='<div class="ab off">Error: '+esc(e.message)+'</div>'}
   btn.disabled=false;btn.innerHTML=old;
 }
-$('ask').onclick=askGaffer;
-$('q').addEventListener('keydown',e=>{if(e.key==='Enter')askGaffer();});
+$('askbtn').onclick=askGaffer;
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')askGaffer()});
 
-/* ---- value bets ---- */
-function renderValue(d){
-  const L=d.labels||{home:'Home',draw:'Draw',away:'Away'};
-  const rows=d.assessments.map(b=>`<tr class="${b.value_bet?'hit':''}">
-    <td>${L[b.outcome]||b.outcome}</td>
-    <td class="num">${b.odds.toFixed(2)}</td>
-    <td class="num">${(b.model_prob*100).toFixed(1)}%</td>
-    <td class="num">${(b.fair_prob*100).toFixed(1)}%</td>
-    <td class="num ${b.edge>=0?'pos':'neg'}">${(b.edge*100).toFixed(1)}%</td>
-    <td class="num ${b.ev_per_unit>=0?'pos':'neg'}">${b.ev_per_unit>=0?'+':''}${b.ev_per_unit.toFixed(3)}</td>
-    <td class="num">${b.stake?b.stake.toFixed(2):'—'}</td></tr>`).join('');
-  const notes=d.assessments.filter(b=>b.note).map(b=>`<div class="vnote">⚠ ${b.note}</div>`).join('');
-  $('vout').innerHTML=`
-    <table class="vtbl"><thead><tr><th>Outcome</th><th>Odds</th><th>Model</th>
-      <th>Fair (no-vig)</th><th>Edge</th><th>EV /unit</th><th>Stake</th></tr></thead>
-      <tbody>${rows}</tbody></table>
-    <div class="verdict ${d.best_bet?'yes':''}">${d.verdict}</div>${notes}
-    <div class="ovr">bookmaker margin ${d.overround_pct??'–'}% · model ${d.model}
-      ${d.odds_source?` · ${d.odds_source.n_bookmakers} books (${d.price_used} price)`:''}</div>`;
-}
-async function findEdge(live){
-  clr();
-  const h=$('home').value,a=$('away').value;
-  if(h===a){err('Pick two different sides.');return;}
-  const base=`home=${encodeURIComponent(h)}&away=${encodeURIComponent(a)}`+
-    `&neutral=${$('neutral').checked}&bankroll=${$('bank').value}&kelly_fraction=${$('kf').value}`;
-  let url;
-  if(live){url=`/value/live?${base}`;}
-  else{
-    const oh=$('oh').value,od=$('od').value,oa=$('oa').value;
-    if(!oh||!od||!oa){err('Enter all three odds (decimal, e.g. 2.10).');return;}
-    url=`/value/manual?${base}&odds_home=${oh}&odds_draw=${od}&odds_away=${oa}`;
-  }
-  const btn=live?$('liveodds'):$('edge'),old=btn.innerHTML;
-  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Pricing';
+/* ---- value ---- */
+async function findEdge(){
+  const oh=$('oh').value,od=$('od').value,oa=$('oa').value;
+  if(!oh||!od||!oa){err('Enter all three decimal odds.');return}
+  const btn=$('edge'),old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spin"></span>Pricing';clr();
   try{
-    const r=await fetch(url);const d=await r.json();
-    if(!r.ok)throw new Error(d.detail||('Error '+r.status));
-    renderValue(d);
-    if(live&&d.odds_source&&d.odds_source.best){
-      $('oh').value=d.odds_source.best.home||'';$('od').value=d.odds_source.best.draw||'';
-      $('oa').value=d.odds_source.best.away||'';}
-  }catch(e){err(e.message);}
+    const r=await fetch(`/value/manual?${q()}&odds_home=${oh}&odds_draw=${od}&odds_away=${oa}`);
+    const d=await r.json();if(!r.ok)throw new Error(d.detail||('Error '+r.status));
+    const rows=(d.assessments||d.legs||[]);
+    let cells='';
+    if(Array.isArray(rows)&&rows.length){
+      cells=rows.map(x=>{const ev=x.ev??x.expected_value,edge=x.edge;
+        const cls=(ev!=null&&ev>0)?'pos':'neg';
+        return `<div class="vc"><div class="v ${cls} num">${ev!=null?(ev>0?'+':'')+(ev*100).toFixed(1)+'%':'–'}</div><div class="k">${esc(x.outcome||x.name||'')} EV · edge ${edge!=null?(edge*100).toFixed(1)+'%':'–'}</div></div>`}).join('');
+    }else{
+      cells=`<div class="vc" style="grid-column:1/-1;text-align:left"><div class="k" style="font-size:.75rem">${esc(JSON.stringify(d).slice(0,400))}</div></div>`;
+    }
+    const box=$('vres');box.className='vres grid3 show';box.innerHTML=cells;
+  }catch(e){err(e.message)}
   btn.disabled=false;btn.innerHTML=old;
 }
-$('edge').onclick=()=>findEdge(false);
-$('liveodds').onclick=()=>findEdge(true);
+$('edge').onclick=findEdge;
 
-/* ---- WC2026 fixtures ---- */
-async function loadFixtures(){
-  try{
-    const d=await (await fetch('/wc2026/fixtures')).json();
-    $('fixtures').innerHTML=d.fixtures.map(f=>{
-      const p=f.probs;
-      return `<div class="fx"><span class="d num">${f.date}</span>
-        <span class="t">${f.home} vs ${f.away} <span class="st">· ${f.stage}${f.neutral?'':' · host adv'}</span></span>
-        <span class="pp">${(p.win*100).toFixed(0)} / ${(p.draw*100).toFixed(0)} / ${(p.loss*100).toFixed(0)}%
-          · fair ${f.fair_odds.home??'–'} / ${f.fair_odds.draw??'–'} / ${f.fair_odds.away??'–'}</span>
-        <button class="b-ghost" onclick="pick('${f.home.replace(/'/g,"\\'")}','${f.away.replace(/'/g,"\\'")}',${f.neutral})">Load</button>
-      </div>`;}).join('')||'no upcoming fixtures in backend/data/wc2026_fixtures.csv';
-  }catch(e){$('fixtures').textContent='fixtures unavailable — '+e.message;}
-}
-function pick(h,a,n){$('home').value=h;$('away').value=a;$('neutral').checked=n;
-  window.scrollTo({top:0,behavior:'smooth'});}
-function koTime(iso){try{return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
-function matchCard(m,kind){
-  let foot;
-  if(kind==='live')foot=`<span class="dot"></span><span class="badge-live">${m.status==='PAUSED'?'HT':'LIVE'}</span>`;
-  else if(kind==='finished')foot=`<span class="badge-ft">full time</span>`;
-  else foot=`<span class="badge-ko">${koTime(m.utc_date)||'kickoff'}</span>`;
-  const sc=v=>v==null?'':v;
-  return `<div class="match"><div class="comp">${m.competition||'—'}</div>
-    <div class="teams">
-      <div class="t"><span>${m.home}</span><span class="sc">${sc(m.home_score)}</span></div>
-      <div class="t"><span>${m.away}</span><span class="sc">${sc(m.away_score)}</span></div>
-    </div><div class="foot">${foot}</div></div>`;
+/* ---- live scores ---- */
+function ko(iso){try{return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){return''}}
+function matchCard(mm,kind){
+  let ft;if(kind==='live')ft=`<span class="dot"></span><span class="b-live">${mm.status==='PAUSED'?'HT':'LIVE'}</span>`;
+  else if(kind==='finished')ft=`<span class="b-ft">Full time</span>`;else ft=`<span class="b-ko">${ko(mm.utc_date)||'Kickoff'}</span>`;
+  const s=v=>v==null?'':v;
+  return `<div class="match"><div class="comp">${esc(mm.competition||'')}</div>
+    <div class="tm"><span>${esc(mm.home)}</span><span class="s">${s(mm.home_score)}</span></div>
+    <div class="tm"><span>${esc(mm.away)}</span><span class="s">${s(mm.away_score)}</span></div>
+    <div class="ft">${ft}</div></div>`;
 }
 async function loadScores(){
-  try{
-    const d=await (await fetch('/live')).json();
-    const box=$('scores');
-    if(d.available===false){box.innerHTML=`<span class="sc-note">${d.note||'Live scores unavailable.'}</span>`;return;}
-    const cards=[...(d.live||[]).map(m=>matchCard(m,'live')),
-                 ...(d.finished||[]).map(m=>matchCard(m,'finished')),
-                 ...(d.upcoming||[]).map(m=>matchCard(m,'upcoming'))];
-    box.innerHTML=cards.length?cards.join(''):`<span class="sc-note">${d.note||'No matches on now — check back around kickoff.'}</span>`;
-  }catch(e){$('scores').innerHTML='<span class="sc-note">Scores unavailable right now.</span>';}
+  try{const d=await(await fetch('/live')).json();const box=$('scores');
+    if(d.available===false){box.innerHTML=`<span class="sc-note">${esc(d.note||'Live scores unavailable.')}</span>`;return}
+    const cards=[...(d.live||[]).map(m=>matchCard(m,'live')),...(d.finished||[]).map(m=>matchCard(m,'finished')),...(d.upcoming||[]).map(m=>matchCard(m,'upcoming'))];
+    box.innerHTML=cards.length?cards.join(''):`<span class="sc-note">${esc(d.note||'No matches on now — check back around kickoff.')}</span>`;
+  }catch(e){$('scores').innerHTML='<span class="sc-note">Scores unavailable right now.</span>'}
 }
-loadHealth();loadTeams();loadFixtures();loadScores();setInterval(loadScores,30000);
+
+/* ---- parallax on the stadium ---- */
+window.addEventListener('scroll',()=>{
+  const p=$('pitch');if(!p)return;const rect=$('read').getBoundingClientRect();
+  if(rect.top<window.innerHeight&&rect.bottom>0){
+    const off=(window.innerHeight-rect.top)*0.04;
+    p.style.transform=`perspective(600px) rotateX(58deg) translateY(${Math.min(off,40)}px)`;
+  }
+},{passive:true});
+
+loadHealth();loadTeams();loadScores();setInterval(loadScores,30000);
 </script>
 </body>
 </html>
