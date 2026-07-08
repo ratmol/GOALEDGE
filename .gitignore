@@ -9,3 +9,8 @@ frontend/dist/
 *.joblib
 *.pkl
 .DS_Store
+.agents/
+.claude/
+.codex/
+.cursor/
+.impeccable/

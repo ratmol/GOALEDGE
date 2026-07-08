@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import AppHeader from './components/AppHeader.jsx'
+import EmptyState from './components/EmptyState.jsx'
 import PredictPanel from './components/PredictPanel.jsx'
 import ResultCard from './components/ResultCard.jsx'
 
@@ -46,39 +48,47 @@ export default function App() {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' }}>
-      {/* Header */}
-      <header style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <div style={{ fontSize: '3rem' }}>⚽</div>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
-          GoalEdge
-        </h1>
-        <p style={{ color: 'var(--muted)', marginTop: 4 }}>
-          World Cup match predictor · Poisson + XGBoost + Elo blend
-        </p>
-      </header>
+    <>
+      <AppHeader />
+      <main className="app-shell">
+        <PredictPanel
+          teams={TEAMS}
+          home={home} away={away} neutral={neutral}
+          setHome={setHome} setAway={setAway} setNeutral={setNeutral}
+          onPredict={handlePredict} onAnalysis={handleAnalysis}
+          loading={loading}
+        />
 
-      <PredictPanel
-        teams={TEAMS}
-        home={home} away={away} neutral={neutral}
-        setHome={setHome} setAway={setAway} setNeutral={setNeutral}
-        onPredict={handlePredict} onAnalysis={handleAnalysis}
-        loading={loading}
-      />
+        {error && (
+          <div className="error-box" role="alert">{error}</div>
+        )}
 
-      {error && (
-        <div style={{ background:'#450a0a', border:'1px solid #ef4444', borderRadius:10, padding:'1rem', marginTop:'1.5rem', color:'#fca5a5' }}>
-          {error}
+        {!result && !error && !loading && <EmptyState />}
+
+        <div aria-live="polite" aria-atomic="false">
+        {loading && !result && (
+          <div className="result-card" aria-busy="true" aria-label="Loading analysis">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+              <div className="skeleton" style={{ height: 18, width: '50%', borderRadius: 4 }} />
+              <div className="skeleton" style={{ height: 18, width: 110, borderRadius: 99 }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="skeleton" style={{ height: 8, borderRadius: 99 }} />
+              <div className="skeleton" style={{ height: 8, width: '80%', borderRadius: 99 }} />
+              <div className="skeleton" style={{ height: 8, width: '65%', borderRadius: 99 }} />
+            </div>
+          </div>
+        )}
+
+        {result && (
+          <ResultCard result={result} preview={preview} home={home} away={away} />
+        )}
         </div>
-      )}
 
-      {result && (
-        <ResultCard result={result} preview={preview} home={home} away={away} />
-      )}
-
-      <footer style={{ textAlign:'center', marginTop:'3rem', color:'var(--muted)', fontSize:'0.8rem' }}>
-        GoalEdge v1 · Elo + Phase-1 model · Probabilities are model estimates only
-      </footer>
-    </div>
+        <footer className="app-footer">
+          GoalEdge · Elo + Poisson + XGBoost blend · Probabilities are model estimates only
+        </footer>
+      </main>
+    </>
   )
 }
