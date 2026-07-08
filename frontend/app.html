@@ -32,7 +32,9 @@
   nav .mark{width:32px;height:32px;border-radius:50%;background:var(--ink);display:grid;place-items:center;flex:none}
   nav .mark svg{width:19px;height:19px}
   nav .wm{font-family:var(--disp);font-size:1.3rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700}
-  nav .menu{margin-left:auto;display:flex;gap:24px;font-family:var(--disp);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+  nav .menu{margin-left:auto;display:flex;gap:24px;font-family:var(--disp);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+  nav .menu a{color:var(--ink2);text-decoration:none;cursor:pointer;transition:color .12s}
+  nav .menu a:hover{color:var(--grn)}
   @media(max-width:640px){nav .menu{display:none}}
 
   .hero{padding:30px 0 42px;border-bottom:3px solid var(--ink)}
@@ -191,7 +193,7 @@
   <nav>
     <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#EBE4D2" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l3.5 2.5-1.4 4h-4.2l-1.4-4z"/><path d="M12 7V3M15.5 9.5l3.5-1.2M14.1 13.5l2.2 3M9.9 13.5l-2.2 3M8.5 9.5L5 8.3"/></svg></span>
     <span class="wm">GoalEdge</span>
-    <span class="menu"><span>Predict</span><span>The Gaffer</span></span>
+    <span class="menu"><a href="#matchup">Predict</a><a href="#askg">The Gaffer</a></span>
   </nav>
 
   <header class="hero">
@@ -210,7 +212,7 @@
     <div id="scores"><span class="sc-note">loading scores…</span></div>
   </section>
 
-  <section>
+  <section id="matchup">
     <div class="sh"><span class="n">I</span><h3>The Matchup</h3><span class="ln"></span></div>
     <div class="card">
       <div class="pick">
@@ -239,8 +241,8 @@
     </div>
   </section>
 
-  <section class="ask">
-    <div class="sh"><span class="n">II</span><h3>Ask the Gaffer</h3><span class="ln"></span></div>
+  <section class="ask" id="askg">
+    <div class="sh"><span class="n">III</span><h3>Ask the Gaffer</h3><span class="ln"></span></div>
     <div class="card">
       <div class="arow">
         <input class="q" id="q" placeholder="Why would Spain dominate corners? Is this a low-scoring game?" />
@@ -251,7 +253,7 @@
   </section>
 
   <section>
-    <div class="sh"><span class="n">III</span><h3>Find the Value</h3><span class="ln"></span></div>
+    <div class="sh"><span class="n">IV</span><h3>Find the Value</h3><span class="ln"></span></div>
     <div class="card">
       <p style="color:var(--ink2);font-size:.92rem;margin-bottom:14px">Enter a bookmaker's decimal odds — the model tells you the edge, expected value and a fractional-Kelly stake.</p>
       <div class="grid3">
