@@ -81,75 +81,55 @@
     animation:sp .7s linear infinite;vertical-align:-1px;margin-right:.4rem}
   @keyframes sp{to{transform:rotate(360deg)}}
 
-  /* ===== THE READ — cinematic stadium ===== */
-  #read{display:none;margin:36px 0 0;background:var(--night);overflow:hidden;border-radius:14px;border:2px solid var(--ink)}
+  /* ===== THE READ — day stadium (bright) ===== */
+  #read{display:none;margin:36px 0 0;background:#dcecf3;overflow:hidden;border-radius:14px;border:2px solid var(--ink)}
   #read.show{display:block}
   .stage{position:relative;padding:32px 26px 28px;min-height:480px;overflow:hidden}
-  .stage .sky{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 120%,#12303f 0%,#0c1a22 42%,var(--night) 78%)}
-  .stage .flood{position:absolute;top:0;width:46%;height:70%;filter:blur(22px);opacity:.55}
-  .stage .flood.l{left:-6%;background:radial-gradient(circle at 22% 0,rgba(190,235,255,.55),transparent 55%)}
-  .stage .flood.r{right:-6%;background:radial-gradient(circle at 78% 0,rgba(190,235,255,.55),transparent 55%)}
-  .stage .stands{position:absolute;left:0;right:0;top:9%;height:32%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 7px);-webkit-mask:linear-gradient(#000,transparent);mask:linear-gradient(#000,transparent);opacity:.55}
+  .stage .sky{position:absolute;inset:0;background:linear-gradient(#a9d9f0 0%,#cfe8f4 45%,#eef5f9 78%)}
+  .stage .sun{position:absolute;top:-9%;right:7%;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,247,214,.95),rgba(255,240,190,.25) 55%,transparent 72%);filter:blur(3px)}
+  .stage .flood,.stage .tower{display:none}
+  .stage .stands{position:absolute;left:0;right:0;top:8%;height:32%;background:repeating-linear-gradient(90deg,rgba(16,14,8,.09) 0 2px,transparent 2px 7px);-webkit-mask:linear-gradient(#000,transparent);mask:linear-gradient(#000,transparent);opacity:.5}
   .stage .pitch{position:absolute;left:-6%;right:-6%;bottom:-2%;height:50%;will-change:transform;
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 48px,rgba(255,255,255,.02) 48px 96px),linear-gradient(#0f6338,#0a4526 70%,#08331d);
-    transform:perspective(600px) rotateX(58deg);transform-origin:bottom;border-top:2px solid rgba(255,255,255,.25)}
-  .stage .pitch:before{content:"";position:absolute;left:50%;bottom:36%;width:118px;height:118px;transform:translateX(-50%);border:2px solid rgba(255,255,255,.28);border-radius:50%}
-  .stage .pitch:after{content:"";position:absolute;left:0;right:0;bottom:36%;height:2px;background:rgba(255,255,255,.28)}
-  .stage .tower{position:absolute;top:2%;width:3px;height:15%;background:rgba(255,255,255,.4)}
-  .stage .tower:before{content:"";position:absolute;top:-9px;left:-11px;width:24px;height:11px;border-radius:3px;background:#eff;box-shadow:0 0 24px 9px rgba(200,240,255,.6)}
-  .stage .tower.a{left:15%}.stage .tower.b{right:15%}
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 48px,rgba(255,255,255,0) 48px 96px),linear-gradient(#43b262,#2c9149 70%,#237c3e);
+    transform:perspective(600px) rotateX(58deg);transform-origin:bottom;border-top:3px solid rgba(255,255,255,.85)}
+  .stage .pitch:before{content:"";position:absolute;left:50%;bottom:36%;width:118px;height:118px;transform:translateX(-50%);border:2px solid rgba(255,255,255,.75);border-radius:50%}
+  .stage .pitch:after{content:"";position:absolute;left:0;right:0;bottom:36%;height:2px;background:rgba(255,255,255,.75)}
   .vsc{position:relative;z-index:2}
-  .vsc .hint{font-family:var(--disp);font-size:.72rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px}
+  .vsc .hint{font-family:var(--disp);font-size:.72rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px}
   .versus{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-bottom:20px}
   .rv{opacity:0;transform:translateY(14px);transition:opacity .6s,transform .6s}
   #read.reveal .rv{opacity:1;transform:none}
-  #read.reveal .rv:nth-child(2){transition-delay:.08s}
-  #read.reveal .d1{transition-delay:.12s}#read.reveal .d2{transition-delay:.20s}
-  #read.reveal .d3{transition-delay:.28s}#read.reveal .d4{transition-delay:.36s}#read.reveal .d5{transition-delay:.44s}
   .team{text-align:center}
-  .team .badge{width:54px;height:54px;border-radius:14px;margin:0 auto 10px;display:grid;place-items:center;font-family:var(--disp);font-size:1.3rem;font-weight:700;color:#06140b;border:2px solid rgba(255,255,255,.25)}
-  .team.h .badge{background:var(--grn-br)}.team.a .badge{background:var(--amber-br)}
-  .team .nm{font-family:var(--disp);font-size:1.55rem;letter-spacing:.03em;text-transform:uppercase;color:#fff;line-height:1.05}
+  .team .badge{width:54px;height:54px;border-radius:14px;margin:0 auto 10px;display:grid;place-items:center;font-family:var(--disp);font-size:1.3rem;font-weight:700;color:#fff;border:2px solid rgba(16,14,8,.18)}
+  .team.h .badge{background:var(--grn)}.team.a .badge{background:var(--amber)}
+  .team .nm{font-family:var(--disp);font-size:1.55rem;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);line-height:1.05}
   .team .win{font-family:var(--disp);font-size:2.6rem;letter-spacing:.02em;margin-top:2px}
-  .team.h .win{color:var(--glow)}.team.a .win{color:var(--amber-br)}
-  .team .xg{font-family:var(--disp);font-size:.68rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em}
-  .vsmid{font-family:var(--disp);font-size:1rem;color:rgba(255,255,255,.5);text-align:center}
-  .vsmid .draw{display:block;font-size:.6rem;color:rgba(255,255,255,.65);margin-top:5px;letter-spacing:.08em}
-  .bcast{background:rgba(4,10,8,.62);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px 18px;margin-top:4px}
-  .brow{display:grid;grid-template-columns:62px 1fr 108px 1fr 62px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.09)}
+  .team.h .win{color:var(--grn)}.team.a .win{color:var(--amber)}
+  .team .xg{font-family:var(--disp);font-size:.68rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em}
+  .vsmid{font-family:var(--disp);font-size:1rem;color:var(--ink2);text-align:center}
+  .vsmid .draw{display:block;font-size:.6rem;color:var(--faint);margin-top:5px;letter-spacing:.08em}
+  .bcast{background:rgba(255,255,255,.9);border:2px solid var(--ink);border-radius:12px;padding:14px 18px;margin-top:4px}
+  .brow{display:grid;grid-template-columns:62px 1fr 108px 1fr 62px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2)}
   .brow:last-child{border:none}
-  .brow .hv{font-family:var(--disp);font-size:1.02rem;text-align:right;color:#fff;letter-spacing:.02em}
-  .brow .av{font-family:var(--disp);font-size:1.02rem;color:#fff;letter-spacing:.02em}
-  .brow .lb{font-family:var(--disp);text-align:center;font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.6)}
-  .track{height:6px;border-radius:4px;background:rgba(255,255,255,.14);position:relative}
-  .track.l>span{position:absolute;right:0;height:100%;border-radius:4px;background:var(--glow)}
-  .track.r>span{position:absolute;left:0;height:100%;border-radius:4px;background:var(--amber-br)}
-  .lh{color:var(--glow)!important}.la{color:var(--amber-br)!important}
+  .brow .hv{font-family:var(--disp);font-size:1.02rem;text-align:right;color:var(--ink);letter-spacing:.02em}
+  .brow .av{font-family:var(--disp);font-size:1.02rem;color:var(--ink);letter-spacing:.02em}
+  .brow .lb{font-family:var(--disp);text-align:center;font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2)}
+  .track{height:6px;border-radius:4px;background:var(--line);position:relative}
+  .track.l>span{position:absolute;right:0;height:100%;border-radius:4px;background:var(--grn)}
+  .track.r>span{position:absolute;left:0;height:100%;border-radius:4px;background:var(--amber)}
+  .lh{color:var(--grn)!important}.la{color:var(--amber)!important}
   .mkts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px}
-  .mk{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 12px;text-align:center}
-  .mk .v{font-family:var(--disp);font-size:1.3rem;color:#fff}
-  .mk .k{font-family:var(--disp);font-size:.58rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
-  .gaffer{margin-top:16px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
-  .gaffer .gt{font-family:var(--disp);font-size:1.02rem;color:#fff;text-transform:uppercase;letter-spacing:.05em}
-  .info{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--glow);color:var(--glow);display:grid;place-items:center;
-    font-family:Georgia,serif;font-size:.8rem;font-style:italic;font-weight:700;cursor:pointer;position:relative}
-  .info .tip{position:absolute;left:0;top:135%;width:320px;max-width:78vw;background:#0c1a14;border:1px solid rgba(143,230,180,.35);
-    border-radius:12px;padding:15px 17px;color:#e4f5ea;font-size:.92rem;line-height:1.6;font-style:normal;font-weight:400;
-    font-family:var(--body);text-transform:none;letter-spacing:0;opacity:0;visibility:hidden;transition:.18s;box-shadow:0 22px 44px -18px #000;z-index:5}
-  .info.open .tip,.info:hover .tip{opacity:1;visibility:visible}
-  .info .tip b{color:var(--glow)}
-  .hoverhint{font-family:var(--disp);font-size:.62rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em}
-  /* gaffer read — top-right control + in-flow panel (never clipped) */
+  .mk{background:rgba(255,255,255,.9);border:2px solid var(--ink);border-radius:10px;padding:11px 12px;text-align:center}
+  .mk .v{font-family:var(--disp);font-size:1.3rem;color:var(--ink)}
+  .mk .k{font-family:var(--disp);font-size:.58rem;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
   .readtop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
-  .gread{font-family:var(--disp);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--glow);
-    background:rgba(143,230,180,.1);border:1px solid rgba(143,230,180,.4);border-radius:99px;padding:.42rem .8rem;
-    cursor:pointer;display:inline-flex;align-items:center;gap:.5rem}
-  .gread:hover{background:rgba(143,230,180,.2)}
-  .gread .ii{width:16px;height:16px;border-radius:50%;border:1px solid var(--glow);display:grid;place-items:center;font-family:Georgia,serif;font-style:italic;font-size:.66rem}
-  .readpanel{display:none;background:rgba(4,10,8,.72);border:1px solid rgba(143,230,180,.32);border-radius:12px;
-    padding:15px 17px;color:#e4f5ea;font-size:.94rem;line-height:1.62;margin-bottom:18px}
+  .gread{font-family:var(--disp);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--grn-d);
+    background:var(--grn-soft);border:2px solid var(--grn);border-radius:99px;padding:.42rem .8rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem}
+  .gread:hover{background:#cfe9d5}
+  .gread .ii{width:16px;height:16px;border-radius:50%;border:1px solid var(--grn-d);display:grid;place-items:center;font-family:Georgia,serif;font-style:italic;font-size:.66rem}
+  .readpanel{display:none;background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:15px 17px;color:var(--ink);font-size:.94rem;line-height:1.62;margin-bottom:18px}
   .readpanel.open{display:block}
-  .readpanel .gload{display:flex;align-items:center;gap:.5rem;color:var(--glow);font-style:italic}
+  .readpanel .gload{display:flex;align-items:center;gap:.5rem;color:var(--grn-d);font-style:italic}
 
   /* ask the gaffer */
   .ask .arow{display:flex;gap:.6rem}
@@ -234,7 +214,7 @@
 
   <section id="read">
     <div class="stage">
-      <div class="sky"></div><div class="flood l"></div><div class="flood r"></div>
+      <div class="sky"></div><div class="sun"></div><div class="flood l"></div><div class="flood r"></div>
       <div class="tower a"></div><div class="tower b"></div><div class="stands"></div>
       <div class="pitch" id="pitch"></div>
       <div class="vsc" id="readbody"></div>
@@ -255,11 +235,18 @@
   <section>
     <div class="sh"><span class="n">IV</span><h3>Find the Value</h3><span class="ln"></span></div>
     <div class="card">
-      <p style="color:var(--ink2);font-size:.92rem;margin-bottom:14px">Enter a bookmaker's decimal odds — the model tells you the edge, expected value and a fractional-Kelly stake.</p>
+      <p style="color:var(--ink2);font-size:.92rem;margin-bottom:14px">Enter the bookmaker's odds in your preferred format — the model returns the edge, expected value and a fractional-Kelly stake.</p>
+      <div style="margin-bottom:14px;max-width:280px"><label for="oddsfmt">Odds format</label>
+        <select id="oddsfmt">
+          <option value="decimal">Decimal — 2.10</option>
+          <option value="american">American — +150 / -180</option>
+          <option value="fractional">Fractional — 11/10</option>
+        </select>
+      </div>
       <div class="grid3">
-        <div><label>Home odds</label><input class="numin" id="oh" type="number" step="0.01" min="1.01" placeholder="2.10"/></div>
-        <div><label>Draw odds</label><input class="numin" id="od" type="number" step="0.01" min="1.01" placeholder="3.40"/></div>
-        <div><label>Away odds</label><input class="numin" id="oa" type="number" step="0.01" min="1.01" placeholder="3.60"/></div>
+        <div><label>Home odds</label><input class="numin" id="oh" type="text" placeholder="2.10"/></div>
+        <div><label>Draw odds</label><input class="numin" id="od" type="text" placeholder="3.40"/></div>
+        <div><label>Away odds</label><input class="numin" id="oa" type="text" placeholder="3.60"/></div>
       </div>
       <div class="row"><div class="btns" style="margin-left:0"><button class="b p" id="edge">Find the edge</button></div></div>
       <div class="vres grid3" id="vres"></div>
@@ -384,12 +371,22 @@ $('askbtn').onclick=askGaffer;
 $('q').addEventListener('keydown',e=>{if(e.key==='Enter')askGaffer()});
 
 /* ---- value ---- */
+function toDecimal(raw,fmt){
+  raw=String(raw||'').trim();if(!raw)return NaN;
+  if(fmt==='american'){const n=parseFloat(raw.replace('+',''));if(isNaN(n)||n===0)return NaN;return n>0?(n/100+1):(100/Math.abs(n)+1)}
+  if(fmt==='fractional'){const m=raw.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);if(!m||+m[2]===0)return NaN;return +m[1]/+m[2]+1}
+  const d=parseFloat(raw);return isNaN(d)?NaN:d;
+}
+function fmtPlaceholders(){const f=$('oddsfmt').value;
+  const ph=f==='american'?['+120','+240','-150']:f==='fractional'?['6/5','12/5','4/6']:['2.10','3.40','3.60'];
+  $('oh').placeholder=ph[0];$('od').placeholder=ph[1];$('oa').placeholder=ph[2];}
 async function findEdge(){
-  const oh=$('oh').value,od=$('od').value,oa=$('oa').value;
-  if(!oh||!od||!oa){err('Enter all three decimal odds.');return}
+  const fmt=$('oddsfmt').value;
+  const oh=toDecimal($('oh').value,fmt),od=toDecimal($('od').value,fmt),oa=toDecimal($('oa').value,fmt);
+  if(!(oh>1&&od>1&&oa>1)){err('Enter valid '+fmt+' odds in all three fields.');return}
   const btn=$('edge'),old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spin"></span>Pricing';clr();
   try{
-    const r=await fetch(`/value/manual?${q()}&odds_home=${oh}&odds_draw=${od}&odds_away=${oa}`);
+    const r=await fetch(`/value/manual?${q()}&odds_home=${oh.toFixed(4)}&odds_draw=${od.toFixed(4)}&odds_away=${oa.toFixed(4)}`);
     const d=await r.json();if(!r.ok)throw new Error(d.detail||('Error '+r.status));
     const rows=(d.assessments||d.legs||[]);
     let cells='';
@@ -404,7 +401,7 @@ async function findEdge(){
   }catch(e){err(e.message)}
   btn.disabled=false;btn.innerHTML=old;
 }
-$('edge').onclick=findEdge;
+$('edge').onclick=findEdge;$('oddsfmt').onchange=fmtPlaceholders;
 
 /* ---- live scores ---- */
 function ko(iso){try{return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){return''}}
@@ -438,3 +435,4 @@ loadHealth();loadTeams();loadScores();setInterval(loadScores,30000);
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
