@@ -67,9 +67,16 @@ try:
         _elo.update(_r.home_team, _r.away_team, int(_r.home_score),
                     int(_r.away_score), bool(getattr(_r, "neutral", True)))
     _simulator = MatchSimulator(TeamModel().fit(_df), n_sims=N_SIMS)
+    # Active national teams only: >=15 matches since 2015, CONIFA excluded.
+    _recent = _df[(_df["date"] >= "2015-01-01")
+                  & ~_df["tournament"].astype(str).str.contains("CONIFA", case=False, na=False)]
+    import pandas as _pd
+    _counts = _pd.concat([_recent["home_team"], _recent["away_team"]]).value_counts()
+    _active_teams = sorted(_counts[_counts >= 15].index)
 except Exception as _e:
     print(f"[api] startup data load failed, falling back: {_e}")
     _simulator = build_default_simulator(n_sims=N_SIMS)
+    _active_teams = None
 _phase1 = None
 _training_active = False
 
@@ -94,7 +101,21 @@ def _predict(home, away, neutral):
             return _phase1.predict(home, away, neutral), "phase1_blend"
         except Exception:
             pass
-    return _elo.win_draw_loss(home, away, neutral), "elo_baseline"
+    return _poisson_wdl(home, away, neutral), "poisson_dc"
+
+
+def _poisson_wdl(home, away, neutral, max_goals: int = 9):
+    """Analytic WDL from the simulator's form/venue-adjusted goal rates.
+    Pure math — replaces the crude Elo draw-band heuristic on Vercel."""
+    import math
+    lam_h, lam_a = _simulator.adjusted_lambdas(home, away, neutral)
+    ph = [math.exp(-lam_h) * lam_h ** i / math.factorial(i) for i in range(max_goals)]
+    pa = [math.exp(-lam_a) * lam_a ** i / math.factorial(i) for i in range(max_goals)]
+    win = sum(ph[i] * pa[j] for i in range(max_goals) for j in range(i))
+    draw = sum(ph[i] * pa[i] for i in range(max_goals))
+    loss = sum(ph[j] * pa[i] for i in range(max_goals) for j in range(i))
+    s = win + draw + loss
+    return {"win": win / s, "draw": draw / s, "loss": loss / s}
 
 
 _llm = get_llm()
@@ -148,7 +169,7 @@ def health():
 
 @app.get("/teams")
 def teams():
-    ts = _simulator.tm.teams
+    ts = _active_teams or _simulator.tm.teams
     return {"teams": ts, "count": len(ts)}
 
 
@@ -334,6 +355,8 @@ def wc2026_fixtures(predict_odds: bool = False):
     if not fpath.exists():
         raise HTTPException(status_code=404, detail="fixtures file missing")
     df = pd.read_csv(fpath, comment="#")
+    today = pd.Timestamp.utcnow().normalize().tz_localize(None)
+    df = df[pd.to_datetime(df["date"]) >= today]
     out = []
     for r in df.itertuples(index=False):
         probs, model = _predict(r.home_team, r.away_team, bool(r.neutral))
