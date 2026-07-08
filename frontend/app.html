@@ -192,11 +192,16 @@
   /* ---------- ask ---------- */
   .askrow{display:flex;gap:.6rem}
   .askrow input{flex:1;padding:.7rem .9rem}
-  .answer{margin-top:1rem;line-height:1.7;font-size:.92rem;color:#c9cec7;
-    white-space:pre-wrap;display:none}
+  .answer{margin-top:1rem;display:none}
   .answer.show{display:block}
-  .answer .used{display:block;margin-top:.7rem;font-family:var(--mono);
-    font-size:.66rem;color:var(--faint)}
+  .answer .ans-body{line-height:1.75;font-size:.95rem;color:#dfe4dc;
+    white-space:pre-wrap}
+  .answer .loading{display:flex;align-items:center;gap:.5rem;color:var(--faint);
+    font-size:.9rem;font-style:italic}
+  .answer .ans-meta{margin-top:.9rem;padding-top:.7rem;
+    border-top:1px solid var(--line2);display:flex;flex-direction:column;gap:.35rem}
+  .answer .used{font-family:var(--mono);font-size:.66rem;color:var(--faint);
+    letter-spacing:.02em}
   .answer .off{color:var(--away)}
 
   footer{margin-top:5rem;padding-top:2rem;border-top:1px solid var(--line2);
@@ -480,18 +485,21 @@ async function askGaffer(){
   const q=$('q').value.trim(); if(!q)return;
   const btn=$('ask'),ans=$('answer'),old=btn.innerHTML;
   btn.disabled=true;btn.innerHTML='<span class="sp"></span>Thinking';
-  ans.className='answer show';ans.textContent='…';
+  ans.className='answer show';
+  ans.innerHTML='<div class="loading"><span class="sp"></span>the gaffer is reading the match…</div>';
+  const esc=t=>String(t).replace(/</g,'&lt;');
   try{
     const r=await fetch('/analyst/ask',{method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({question:q,home:$('home').value,away:$('away').value})});
     const d=await r.json();
     const srcs=(d.sources||[]).join(', ');
-    ans.innerHTML=`${d.answer.replace(/</g,'&lt;')}`+
-      (srcs?`<span class="used">sources: ${srcs}</span>`:'')+
-      (d.llm_error?`<span class="used off">⚠ LLM error: ${d.llm_error.replace(/</g,'&lt;')}</span>`:'')+
-      (d.ollama===false?`<span class="used off">⚠ no analyst LLM configured — set LLM_API_KEY (free hosted model) or run Ollama to enable chat.</span>`:'');
-  }catch(e){ans.textContent='Error: '+e.message;}
+    const meta=(srcs?`<span class="used">sources: ${esc(srcs)}</span>`:'')+
+      (d.llm_error?`<span class="used off">⚠ ${esc(d.llm_error)}</span>`:'')+
+      (d.ollama===false?`<span class="used off">⚠ no analyst LLM configured — set a provider key (e.g. CEREBRAS_API_KEY) or run Ollama.</span>`:'');
+    ans.innerHTML=`<div class="ans-body">${esc(d.answer)}</div>`+
+      (meta?`<div class="ans-meta">${meta}</div>`:'');
+  }catch(e){ans.innerHTML='<div class="ans-body off">Error: '+esc(e.message)+'</div>';}
   btn.disabled=false;btn.innerHTML=old;
 }
 $('ask').onclick=askGaffer;
