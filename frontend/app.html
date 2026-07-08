@@ -137,6 +137,17 @@
   .info.open .tip,.info:hover .tip{opacity:1;visibility:visible}
   .info .tip b{color:var(--glow)}
   .hoverhint{font-family:var(--disp);font-size:.62rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em}
+  /* gaffer read — top-right control + in-flow panel (never clipped) */
+  .readtop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+  .gread{font-family:var(--disp);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--glow);
+    background:rgba(143,230,180,.1);border:1px solid rgba(143,230,180,.4);border-radius:99px;padding:.42rem .8rem;
+    cursor:pointer;display:inline-flex;align-items:center;gap:.5rem}
+  .gread:hover{background:rgba(143,230,180,.2)}
+  .gread .ii{width:16px;height:16px;border-radius:50%;border:1px solid var(--glow);display:grid;place-items:center;font-family:Georgia,serif;font-style:italic;font-size:.66rem}
+  .readpanel{display:none;background:rgba(4,10,8,.72);border:1px solid rgba(143,230,180,.32);border-radius:12px;
+    padding:15px 17px;color:#e4f5ea;font-size:.94rem;line-height:1.62;margin-bottom:18px}
+  .readpanel.open{display:block}
+  .readpanel .gload{display:flex;align-items:center;gap:.5rem;color:var(--glow);font-style:italic}
 
   /* ask the gaffer */
   .ask .arow{display:flex;gap:.6rem}
@@ -195,6 +206,11 @@
   </header>
 
   <section>
+    <div class="sh"><span class="n">◆</span><h3>On Now &amp; Recent</h3><span class="ln"></span></div>
+    <div id="scores"><span class="sc-note">loading scores…</span></div>
+  </section>
+
+  <section>
     <div class="sh"><span class="n">I</span><h3>The Matchup</h3><span class="ln"></span></div>
     <div class="card">
       <div class="pick">
@@ -207,7 +223,6 @@
         <span class="rest">Rest H<input type="number" id="rh" value="4" min="1" max="14"/></span>
         <span class="rest">A<input type="number" id="ra" value="4" min="1" max="14"/></span>
         <div class="btns">
-          <button class="b s" id="scout">Scout</button>
           <button class="b p" id="run">Run the model</button>
         </div>
       </div>
@@ -249,11 +264,6 @@
     </div>
   </section>
 
-  <section>
-    <div class="sh"><span class="n">IV</span><h3>On Now &amp; Recent</h3><span class="ln"></span></div>
-    <div id="scores"><span class="sc-note">loading scores…</span></div>
-  </section>
-
   <footer>
     Fitted on real results · World Cup · Euros · Copa América · Nations League<br>
     Probabilities are model estimates, not betting advice
@@ -290,12 +300,15 @@ function stat(lb,h,a,unit=''){
 }
 function mk(k,v,s=''){return `<div class="mk rv"><div class="v num">${v}${s}</div><div class="k">${k}</div></div>`}
 
-function renderRead(d,scout){
-  const h=d.fixture.home,a=d.fixture.away,o=d.outcome,ts=d.team_stats,m=d.markets;
-  const eg=d.expected_goals;
-  const readTxt=scout||"Run the scout report for the Gaffer's written take on this one.";
+let lastQuery='',gaffLoaded=false;
+function renderRead(d){
+  const h=d.fixture.home,a=d.fixture.away,o=d.outcome,ts=d.team_stats,m=d.markets,eg=d.expected_goals;
   $('readbody').innerHTML=`
-    <div class="hint">II — The Read · Full-time projection</div>
+    <div class="readtop">
+      <div class="hint">II — The Read · Full-time projection</div>
+      <button class="gread" id="greadbtn">The Gaffer's Read <span class="ii">i</span></button>
+    </div>
+    <div class="readpanel" id="readpanel"></div>
     <div class="versus">
       <div class="team h rv"><div class="badge">${badge(h)}</div><div class="nm">${esc(h)}</div><div class="win num">${o.home_win}%</div><div class="xg">xG ${eg.home}</div></div>
       <div class="vsmid rv">VS<span class="draw">DRAW ${o.draw}%</span></div>
@@ -314,31 +327,38 @@ function renderRead(d,scout){
       ${mk('Corners',m.total_corners_avg)}
       ${mk('Over 10.5 crn',m.over_10_5_corners,'%')}
       ${mk('Cards',m.total_cards_avg)}
-    </div>
-    <div class="gaffer rv">
-      <span class="gt">The Gaffer's Read</span>
-      <span class="info" id="ginfo">i<span class="tip">${esc(readTxt)}</span></span>
-      <span class="hoverhint">hover / tap</span>
     </div>`;
   const read=$('read');read.classList.add('show');
-  $('ginfo').addEventListener('click',()=>$('ginfo').classList.toggle('open'));
+  $('greadbtn').addEventListener('click',openGaffer);
   requestAnimationFrame(()=>{read.classList.remove('reveal');requestAnimationFrame(()=>read.classList.add('reveal'))});
   read.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-async function call(url,btn,label,scout){
+async function openGaffer(){
+  const p=$('readpanel');
+  if(p.classList.contains('open')){p.classList.remove('open');return}
+  p.classList.add('open');
+  if(gaffLoaded)return;
+  p.innerHTML='<span class="gload"><span class="spin"></span>the gaffer is writing the read…</span>';
+  try{
+    const r=await fetch(`/match/scout?${lastQuery}`);const d=await r.json();
+    p.innerHTML=esc(d.scout_report||'No read available for this one.');gaffLoaded=true;
+  }catch(e){p.innerHTML='Could not load the read right now.'}
+}
+
+async function run(btn){
   clr();
   if($('home').value===$('away').value){err('Pick two different sides.');return}
-  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML=`<span class="spin"></span>${label}`;
+  const old=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spin"></span>Running';
+  lastQuery=q();gaffLoaded=false;
   try{
-    const r=await fetch(`${url}?${q()}`);const d=await r.json();
+    const r=await fetch(`/match/full?${lastQuery}`);const d=await r.json();
     if(!r.ok)throw new Error(d.detail||('Error '+r.status));
-    renderRead(d,scout?d.scout_report:null);
+    renderRead(d);
   }catch(e){err(e.message)}
   btn.disabled=false;btn.innerHTML=old;
 }
-$('run').onclick=e=>call('/match/full',e.currentTarget,'Running',false);
-$('scout').onclick=e=>call('/match/scout',e.currentTarget,'Scouting',true);
+$('run').onclick=e=>run(e.currentTarget);
 
 /* ---- ask the gaffer ---- */
 async function askGaffer(){
