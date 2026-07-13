@@ -25,6 +25,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+import { Analytics } from "@vercel/analytics/next"
 
 from fastapi import FastAPI, BackgroundTasks, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
