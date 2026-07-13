@@ -14,3 +14,9 @@ frontend/dist/
 .codex/
 .cursor/
 .impeccable/
+
+# root npm artifacts (this is a Python project — do NOT deploy as Node)
+/node_modules/
+/package.json
+/package-lock.json
+backend/models/_synctest.txt
