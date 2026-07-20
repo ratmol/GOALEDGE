@@ -26,7 +26,10 @@ import threading
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, BackgroundTasks, Body, HTTPException
+from collections import defaultdict, deque
+
+from fastapi import (FastAPI, BackgroundTasks, Body, HTTPException, Request,
+                     Header)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -56,6 +59,31 @@ _allowed_origins = ["*"] if _origins_env == "*" else [
     o.strip() for o in _origins_env.split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=_allowed_origins,
                    allow_methods=["GET", "POST"], allow_headers=["*"])
+
+# --- Best-effort in-memory rate limiting on quota-bound endpoints. ------------
+# Serverless instances are ephemeral, so this is a soft guard against casual
+# abuse (and runaway API cost), not a hard security control. Tune via env.
+_RL_WINDOW = float(os.getenv("RATE_WINDOW_SEC", "60"))
+_RL_MAX = int(os.getenv("RATE_MAX_REQUESTS", "60"))
+_RL_HITS: dict = defaultdict(deque)
+_RL_PATHS = ("/live", "/value/live", "/match/scout", "/analyst/ask", "/train")
+
+
+@app.middleware("http")
+async def _rate_limit(request: Request, call_next):
+    path = request.url.path
+    if any(path.startswith(pfx) for pfx in _RL_PATHS):
+        ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        hits = _RL_HITS[ip]
+        while hits and now - hits[0] > _RL_WINDOW:
+            hits.popleft()
+        if len(hits) >= _RL_MAX:
+            from fastapi.responses import JSONResponse
+            return JSONResponse(status_code=429,
+                                content={"detail": "rate limit exceeded, slow down"})
+        hits.append(now)
+    return await call_next(request)
 
 _elo = EloModel()
 # Load the match history ONCE and share it between the Elo warm-up and the
@@ -254,7 +282,13 @@ def backtest(warmup: int = 40):
 
 
 @app.post("/train")
-def train(background_tasks: BackgroundTasks):
+def train(background_tasks: BackgroundTasks, x_train_token: str = Header(default="")):
+    # Retraining is expensive, so it requires a shared secret. If TRAIN_TOKEN is
+    # unset the endpoint is disabled entirely (safe default for public deploys).
+    _expected = os.getenv("TRAIN_TOKEN", "")
+    if not _expected or x_train_token != _expected:
+        raise HTTPException(status_code=403,
+                            detail="training endpoint disabled or invalid token")
     global _training_active
     if _training_active:
         raise HTTPException(status_code=409, detail="Training already in progress")
@@ -416,6 +450,10 @@ def serve_frontend(full_path: str):
     if _DASHBOARD.exists():
         return FileResponse(str(_DASHBOARD))
     if _DIST.exists():
-        f = _DIST / full_path
-        return FileResponse(str(f if f.is_file() else _DIST / "index.html"))
+        base = _DIST.resolve()
+        target = (base / full_path).resolve()
+        # Prevent path traversal: only serve files that live inside _DIST.
+        if (target == base or base in target.parents) and target.is_file():
+            return FileResponse(str(target))
+        return FileResponse(str(_DIST / "index.html"))
     return {"detail": "frontend not built"}

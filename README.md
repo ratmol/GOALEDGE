@@ -1,227 +1,125 @@
-# ⚽💰 GoalEdge — The Gaffer's Match Lab
+# GoalEdge: The Gaffer's Match Lab
 
-GoalEdge does **not** just pick a winner. It simulates the **entire match** —
-goals, expected goals, shots, shots on target, possession, corners, fouls,
-yellow/red cards, offsides — and prices every market (BTTS, over/unders, clean
-sheets, most-likely scorelines) via a 20,000-run Monte Carlo engine. A free local
-LLM (Ollama) turns the numbers into a written scout report.
+A World Cup and international football match simulator with a built-in AI analyst and a value-betting engine.
 
+**Live demo:** [goaledge-ten.vercel.app](https://goaledge-ten.vercel.app)
+**Stack:** Python (FastAPI) plus a single self-contained frontend, deployed on Vercel.
 
-> **NEW in v3 — the gambler's rebuild (2026-07-05).** Dixon-Coles draw
-> correction, weighted MLE, chronological (out-of-time) validation, fixed
-> inference features, and a full **value-bet engine**: de-vigged edge, EV,
-> fractional Kelly staking, live odds via The Odds API, and WC-2026 fixtures
-> with fair odds on the dashboard. Read **RESEARCH.md** for what works and
-> what doesn't. To unlock the full ~48k-match training set run once:
-> `python scripts/download_data.py` then `python train.py`.
-
-> **NEW in v2:** full-stats `MatchSimulator` (`backend/models/match_simulator.py`),
-> rich `/match/full` + `/match/scout` API endpoints, and a redesigned single-file
-> dashboard (`frontend/app.html`) fronted by the persona below.
+> Status: active development. Core simulator, analyst, and value engine are live. The reinforcement-learning staking agent is in progress. Contributions are welcome (see [Contributing](#contributing)).
 
 ---
 
-## 1. The Persona — "The Gaffer"
+## What it does
 
-> **The Gaffer** — a hybrid football tactician and quantitative trader.
-> *"I don't pick winners — I price the whole match. Goals, corners, cards,
-> territory. Tell me the two sides and I'll show you how the 90 minutes breathe."*
->
-> Reads a match like a manager, prices it like a trader: every output is a
-> probability or a distribution, never a flat verdict.
+GoalEdge doesn't just pick a winner. It simulates the whole match: goals, expected goals, shots, possession, corners, cards, and offsides, then prices every market (1X2, over/unders, BTTS, clean sheets, most-likely scorelines) from a 20,000-run Monte Carlo engine.
 
-**Football brain**
-- Reads tactics, fixture congestion, travel/recovery load, momentum and streaks.
-- Knows that xG > goals, that home/neutral venue matters, and that a "form table"
-  beats a league table for short-term prediction.
-- Treats injuries, squad depth, and rest days as first-class signals.
+Three things sit on top of that engine:
 
-**Finance brain**
-- Frames every prediction as a probability, not a verdict ("62% win" not "they win").
-- Thinks in expected value, calibration, and edge vs. the implied odds of the market.
-- Applies risk discipline: confidence intervals, Kelly-style sizing, and never
-  confusing a confident model with a correct one.
+1. **The simulator.** A weighted Poisson model that produces full outcome distributions per fixture, not a single verdict.
+2. **The Gaffer.** An AI analyst that reads the simulation and writes a plain-English scouting report for the match.
+3. **The value engine.** It compares the model against real bookmaker odds, strips the margin, and reports edge, expected value, and a fractional-Kelly stake so you know when there is value (and when there isn't).
 
-**Operating principles**
-1. **Probabilities, not prophecies.** Every output is a calibrated distribution.
-2. **Backtest before you trust.** No model ships without out-of-sample validation.
-3. **Explainability matters.** A prediction without a "why" is a coin flip with a logo.
-4. **Free-first.** Default to zero-cost data + local inference (Ollama) before paid APIs.
+The goal: price the entire 90 minutes the way a trader prices a market, then explain the reasoning in words.
 
----
+## How it works
 
-## 2. Skills & Capabilities
+**The model.** A weighted Poisson model fitted on roughly 19,800 real international results: World Cups, Euros, Copa América, Nations League, and friendlies. Competition and recency weighting mean a recent knockout counts for more than a decade-old friendly. Each fixture runs 20,000 Monte Carlo simulations to produce win/draw/loss, xG, shots, possession, corners, cards, scorelines, and the derived markets. Recent form and rest-day recovery feed in, and team-specific tendencies come from a pluggable profile table.
 
-| Domain | What it does |
-|---|---|
-| **Data engineering** | Pulls + normalizes data from free football APIs, StatsBomb open data, and CSV datasets into a unified schema. |
-| **Feature engineering** | Builds recovery/rest features, rolling form (xG, points, goal diff), Elo, streaks, head-to-head, squad availability. |
-| **Predictive modeling** | Poisson/Dixon-Coles for scorelines + gradient-boosting (XGBoost/LightGBM) for win/draw/loss probabilities. |
-| **Reinforcement learning** | (Phase 2) An agent that "stakes" predictions and learns a policy from match outcomes, optimizing calibrated EV. |
-| **LLM analysis (Ollama)** | Generates natural-language match previews and reasoning from the model's feature vector — free + local. |
-| **Quant Analyzer (skill)** | Mathematically rigorous module that *loops* — refines features/model until validation Brier ≤ target. See `skills/quant-analyzer.md`. |
-| **Token Optimizer (skill)** | *Loops* to compress every LLM prompt under a token budget without losing signal. See `skills/token-optimizer.md`. |
-| **Calibration & backtesting** | Brier score, log-loss, reliability diagrams, walk-forward validation. |
-| **API / app delivery** | FastAPI backend serving predictions; React frontend dashboard. |
+**The Gaffer (AI analyst).** A retrieval-augmented analyst. A BM25 retriever pulls relevant team and concept notes, and the analyst injects those plus the live simulation into one prompt to produce a written read. It runs on a hosted LLM with automatic provider fallback, and degrades gracefully to a deterministic summary if no model is reachable, so the analysis layer never hard-fails.
 
-> **Team chemistry** is a first-class feature (`backend/features/chemistry.py`):
-> lineup continuity, squad stability, and shared on-pitch minutes — public-data
-> proxies for how well a side actually gels.
+**The value engine.** It accepts bookmaker odds in decimal, American, or fractional format, recovers fair probabilities by removing the margin, and reports edge, expected value, and a fractional-Kelly stake for every outcome.
 
----
+## Quickstart
 
-## 3. Data Sources (free-first, per your selection)
-
-We use a layered strategy so the app works fully offline but can pull live data.
-
-**A. Free football APIs (live / recent)**
-- [football-data.org](https://www.football-data.org/) — free tier, fixtures,
-  results, standings. Requires a free API key (rate-limited).
-- [API-Football](https://www.api-football.com/) — free tier (100 req/day) for
-  fixtures, lineups, injuries, statistics.
-
-**B. StatsBomb Open Data (rich, event-level)**
-- [statsbomb/open-data](https://github.com/statsbomb/open-data) — free, includes
-  past World Cups. Great for xG, player events, and recovery/load proxies.
-
-**C. CSV / manual datasets (offline, reproducible)**
-- Kaggle historical World Cup results, FIFA rankings, and squad CSVs.
-- Used to seed Elo, head-to-head, and to run fully offline backtests.
-
-> **Recovery data note:** true biometric recovery isn't public. We proxy it with
-> days-since-last-match, minutes load, travel distance between host cities, and
-> fixture congestion — all derivable from the sources above.
-
----
-
-## 4. Model Approach (phased, per your selection)
-
-### Phase 1 — Classic ML + Ollama explanations
-- **Win/Draw/Loss:** gradient-boosting classifier on engineered features.
-- **Scorelines:** Dixon-Coles / Poisson for exact-score and over/under.
-- **Elo baseline:** sanity-check + cold-start for teams with little data.
-- **Ollama:** feed the model's features + probabilities to a local LLM
-  (e.g. `llama3.1` or `mistral`) to write the match preview and reasoning.
-  Zero cost, runs on your machine.
-
-### Phase 2 — Reinforcement learning
-- **Setup:** episodic — each match is a step; the agent outputs a predicted
-  distribution / "stake," receives reward based on calibration + EV vs. outcome.
-- **Algorithms:** start with contextual bandits → move to PPO (Stable-Baselines3)
-  if we model a tournament as a sequence.
-- **Reward design:** negative log-loss / Brier-based reward so the agent is
-  rewarded for *calibration*, not just picking winners.
-- **Why phased:** Phase 1 gives a strong, explainable baseline. RL only earns its
-  place if it beats that baseline out-of-sample.
-
----
-
-## 5. LLM / Inference: Ollama (free, local) vs. API
-
-**Recommended: Ollama (no cost).**
-- Install: https://ollama.com → `ollama pull llama3.1` (or `mistral`, `phi3`).
-- Runs locally, no API key, no per-token cost — perfect for match previews and
-  reasoning over the feature vector.
-- The backend calls `http://localhost:11434/api/generate`.
-
-**When a paid API helps:** larger context, higher quality long-form analysis, or
-if you don't want to run a local model. The code will keep the LLM layer behind a
-single interface so you can swap Ollama ↔ a hosted API with one config change.
-
-> ⚠️ **Important:** the LLM does **not** make the prediction. The math model
-> produces probabilities; the LLM only explains them. This keeps predictions
-> reproducible and auditable.
-
----
-
-## 6. Connectors & API Requests
-
-**Outbound API calls the app will make**
-- `GET` football-data.org / API-Football → fixtures, lineups, injuries, stats
-  (needs free API key in `.env`).
-- `GET` StatsBomb open-data (raw GitHub JSON, no key).
-- `POST` `localhost:11434` → Ollama for text generation (no key).
-
-**Internal API (what the app serves)** — FastAPI:
-- `GET /predict?home=ARG&away=FRA` → probabilities + expected scoreline.
-- `GET /match/{id}/analysis` → Ollama-generated preview.
-- `GET /standings`, `GET /form/{team}` → supporting data.
-
-**Connectors (your Cowork tools):** if you later want predictions delivered to
-Slack, Google Sheets, or a calendar (e.g. "post tomorrow's predictions each
-morning"), those can be wired via Cowork connectors + a scheduled task. Just say
-the word and I'll search the connector registry.
-
-**Secrets:** all API keys live in a `.env` file (git-ignored). Never committed.
-
----
-
-## 7. Proposed Architecture
-
-```
-worldcup-predictor/
-├── backend/
-│   ├── data/            # loaders: football_data.py, statsbomb.py, csv_loader.py
-│   ├── features/        # rest, form, elo, congestion, h2h
-│   ├── models/          # poisson.py, xgb_model.py, elo.py, rl/ (phase 2)
-│   ├── llm/             # ollama_client.py (swappable interface)
-│   ├── api/             # FastAPI routes
-│   └── backtest/        # walk-forward validation + calibration metrics
-├── frontend/            # React dashboard (matchups, probabilities, previews)
-├── data_cache/          # downloaded + CSV datasets (git-ignored)
-├── .env.example
-└── README.md
+```bash
+git clone https://github.com/ratmol/GOALEDGE
+cd GOALEDGE
+pip install -r requirements.txt
+cp .env.example .env          # add any API keys you have (all optional)
+uvicorn backend.api.main:app --reload
 ```
 
-**Stack:** Python (FastAPI, pandas, scikit-learn, XGBoost, Stable-Baselines3) +
-React (Vite). Ollama for local LLM.
+Open http://localhost:8000. The app runs with zero API keys: you get the full simulator and value tools. Add keys to enable the live AI analyst and live scores. For model training and the RL work, also install `requirements-dev.txt`.
 
----
+Environment variables (all optional):
 
-## 8. Roadmap
+| Variable | Purpose |
+|:---|:---|
+| `CEREBRAS_API_KEY` or `OPENROUTER_API_KEY` | AI analyst (The Gaffer) |
+| `FOOTBALL_DATA_API_KEY` | Live scores and fixtures |
+| `ODDS_API_KEY` | Live bookmaker odds for the value engine |
+| `TRAIN_TOKEN` | Shared secret required to call `POST /train` (leave unset to disable) |
+| `RATE_MAX_REQUESTS`, `RATE_WINDOW_SEC` | Rate limit on quota-bound endpoints |
 
-- [ ] **M0 – Scaffold:** repo structure, `.env.example`, dependency setup.
-- [ ] **M1 – Data:** loaders for CSV + StatsBomb + one free API; unified schema.
-- [ ] **M2 – Features:** rest/recovery, rolling form, Elo, streaks, H2H.
-- [ ] **M3 – Phase 1 model:** Poisson + XGBoost, with backtest + calibration.
-- [ ] **M4 – Ollama layer:** match previews from feature vectors.
-- [ ] **M5 – API + React UI:** serve predictions, build the dashboard.
-- [ ] **M6 – Phase 2 RL:** bandit → PPO agent, benchmarked vs. M3 baseline.
-- [ ] **M7 – Delivery:** optional connectors + scheduled daily predictions.
+## Project structure
 
----
+```
+backend/
+  api/         FastAPI routes (main.py)
+  models/      match_simulator.py, elo.py, phase1.py, rl_agent.py
+  features/    form, chemistry, engineered signals
+  value/       value engine and odds handling
+  llm/         provider chain + analyst
+  rag/         BM25 retriever and corpus
+  data/        loaders and CSV datasets
+  backtest/    walk-forward validation and calibration
+frontend/
+  app.html     single self-contained dashboard served at /
+scripts/       training and utility scripts
+```
 
-## 9. Decisions (locked in)
+## API tour
 
-1. **Scope:** World Cup **+ club/league matches** as extra training data — more
-   samples = a better-calibrated model.
-2. **Team chemistry:** included as a feature (lineup continuity, squad stability,
-   minutes-played-together).
-3. **API keys:** designed around **free tiers**; add your keys to `.env` later
-   (`.env.example` + signup links provided).
-4. **Ollama:** not yet installed — please install from https://ledger… → run
-   `ollama pull llama3.1`. (Install: https://ollama.com) The app **runs without it** (probabilities only) and
-   lights up previews once it's running.
-5. **Delivery:** daily predictions pushed on a schedule. Because text is
-   generated **locally by Ollama**, this costs ~no API tokens. See
-   `backend/daily_predictions.py`.
+| Endpoint | What you get |
+|:---|:---|
+| `GET /predict?home=Argentina&away=France` | Win/draw/loss probabilities |
+| `GET /match/full` | Full simulated stat profile and markets |
+| `GET /match/scout` | Full profile plus The Gaffer's written read |
+| `GET /value/manual` | Your odds in, edge/EV/Kelly out |
+| `GET /value/live` | Live odds via The Odds API, value assessment out |
+| `GET /health/llm?ping=true` | Analyst diagnostics |
 
-## 10. Skills that *loop until a threshold* (your request)
+## Contributing
 
-Unlike static instructions, both custom skills run iterative loops:
+Contributions are genuinely welcome, whether that is code, data, bug reports, or ideas. This is a solo project that is more fun with others involved.
 
-- **Quant Analyzer** keeps applying improvement actions (form windows → recovery →
-  chemistry → tuning → recalibration → blending) until validation
-  **Brier ≤ `TARGET_BRIER`** (default 0.20) or it hits `MAX_QUANT_ITERATIONS`.
-- **Token Optimizer** keeps applying compression actions until the prompt is
-  **≤ `MAX_PROMPT_TOKENS`** (default 1500), never dropping the must-keep
-  probabilities.
+**Getting started:**
 
-Both are configurable in `.env` and have runnable demos:
-`python backend/skills/quant_analyzer.py` and
-`python backend/skills/token_optimizer.py`.
+1. Fork the repo and create a branch: `git checkout -b feature/your-idea`.
+2. Follow the Quickstart above to run it locally.
+3. Keep changes focused, and add a short note in the PR describing what and why.
+4. Open a pull request against `main`.
 
----
+**Good first contributions:**
 
-*Built with a tactician's eye and a trader's discipline. Predictions are
-probabilities — bet responsibly, and trust the backtest.*
+* Add or clean up team profiles in the data files.
+* Improve the retrieval corpus so The Gaffer's reads are sharper.
+* Add tests around the value engine math (de-vig, EV, Kelly).
+* Expand the dataset with more international results, with sources cited.
+* UI and accessibility improvements to `frontend/app.html`.
+
+**Ground rules:**
+
+* Keep the deployed runtime dependencies slim. Heavy training and RL libraries belong in `requirements-dev.txt`, imported lazily.
+* Never commit secrets. All keys live in `.env`, which is gitignored.
+* If you touch the model or value math, include a quick before/after so reviewers can sanity-check it.
+
+Not sure where to start? Open an issue describing what you want to work on and we can scope it together.
+
+## Roadmap
+
+Planned and in progress:
+
+* **RL staking agent (in progress):** a reinforcement-learning agent that decides how much to stake, not just what to bet. Each match is a step, the agent sizes stakes from the model's probabilities and the market odds, and it is rewarded on log bankroll growth. Trained locally and benchmarked against flat-stake and Kelly baselines, then served through a dedicated endpoint.
+* **Club and league football:** extend beyond internationals to domestic leagues so the model trains on far more matches and can price club fixtures.
+* **Semantic retrieval:** upgrade The Gaffer from BM25 to embedding-based search for more relevant scouting notes.
+* **Dark mode and a photoreal matchday UI:** a night-stadium theme and richer visuals.
+* **Test coverage and CI:** unit tests around the model and value math, wired into GitHub Actions.
+
+## Responsible use
+
+GoalEdge is a modelling and analysis tool, not betting advice. Every output is a probability or a distribution, never a certainty: models can be confident and wrong. If you bet, only bet what you can afford to lose.
+
+## License
+
+See [LICENSE](LICENSE). If none is present yet, treat the code as all-rights-reserved until one is added, and open an issue if you would like to use it.
